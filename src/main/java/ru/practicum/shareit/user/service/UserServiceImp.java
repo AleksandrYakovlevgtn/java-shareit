@@ -1,0 +1,76 @@
+package ru.practicum.shareit.user.service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.NotUniqueException;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.storage.UserStorage;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static ru.practicum.shareit.user.UserMapper.*;
+
+@Slf4j
+@Service
+public class UserServiceImp implements UserService {
+    private final UserStorage uStorage;
+
+    public UserServiceImp(UserStorage uStorage) {
+        this.uStorage = uStorage;
+    }
+
+    @Override
+    public UserDto add(User user) {
+        if (!checkEmail(user.getId(), user.getEmail())) {
+            log.error("Email: " + user.getEmail() + " занят!");
+        }
+        return createUserDto(uStorage.add(user));
+    }
+
+    @Override
+    public UserDto update(User user, long id) {
+        user.setId(id);
+        User updated = uStorage.takeById(id).orElseThrow(() -> new NotFoundException("Пользователь не найден с таким id: " + id));
+        if (user.getName() != null) {
+            updated.setName(user.getName());
+        }
+        if (user.getEmail() != null && !user.getEmail().equals(updated.getEmail())) {
+            checkEmail(user.getId(), user.getEmail());
+            updated.setEmail(user.getEmail());
+        }
+        return createUserDto(uStorage.update(updated));
+    }
+
+    @Override
+    public void delete(Long id) {
+        uStorage.delete(id);
+    }
+
+    @Override
+    public UserDto get(Long id) {
+        User user = uStorage.takeById(id).orElseThrow(() -> new NotFoundException("Пользователь не найден с таким id: " + id));
+        return createUserDto(user);
+    }
+
+    @Override
+    public Collection<UserDto> getAll() {
+        List<UserDto> users = new ArrayList<>();
+        for (User user : uStorage.takeAll()) {
+            users.add(createUserDto(user));
+        }
+        return users;
+    }
+
+    public boolean checkEmail(Long id, String email) {
+        for (User user : uStorage.takeAll()) {
+            if (user.getEmail().equals(email) && !(user.getId().equals(id))) {
+                throw new NotUniqueException("Email: " + email + " занят!");
+            }
+        }
+        return true;
+    }
+}
