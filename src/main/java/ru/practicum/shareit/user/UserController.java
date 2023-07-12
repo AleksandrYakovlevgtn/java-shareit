@@ -46,9 +46,9 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public UserDto update(@RequestBody User user
-            , @PathVariable Long id
-            , Errors errors) {
+    public UserDto update(@RequestBody User user,
+                          @PathVariable Long id,
+                          Errors errors) {
         if (errors.hasErrors()) {
             throw new ValidationException("Произошла ошибка." + errors.getAllErrors());
         } else {

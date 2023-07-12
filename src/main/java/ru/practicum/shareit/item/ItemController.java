@@ -39,9 +39,9 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto add(@RequestHeader("X-Sharer-User-Id") Long userId
-            , @Valid @RequestBody ItemDto itemDto
-            , Errors errors) {
+    public ItemDto add(@RequestHeader("X-Sharer-User-Id") Long userId,
+                       @Valid @RequestBody ItemDto itemDto,
+                       Errors errors) {
         if (errors.hasErrors()) {
             throw new ValidationException("Произошла ошибка." + errors.getAllErrors());
         } else {

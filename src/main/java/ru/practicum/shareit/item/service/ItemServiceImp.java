@@ -74,7 +74,7 @@ public class ItemServiceImp implements ItemService {
     @Override
     public List<ItemDto> search(String text) {
         List<ItemDto> founded = new ArrayList<>();
-        if(text.isBlank()){
+        if (text.isBlank()) {
             return founded;
         }
         for (Item item : iStorage.getAll()) {
