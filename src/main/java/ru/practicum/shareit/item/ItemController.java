@@ -50,10 +50,10 @@ public class ItemController {
     }
 
     @PatchMapping("/{id}")
-    public ItemDto update(@RequestBody ItemDto itemDto
-            , @PathVariable Long id
-            , @RequestHeader("X-Sharer-User-Id") Long userId
-            , Errors errors) {
+    public ItemDto update(@RequestBody ItemDto itemDto,
+                          @PathVariable Long id,
+                          @RequestHeader("X-Sharer-User-Id") Long userId,
+                          Errors errors) {
         if (errors.hasErrors()) {
             throw new ValidationException("Произошла ошибка." + errors.getAllErrors());
         } else {
