@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
@@ -11,32 +12,34 @@ import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static java.util.Arrays.stream;
 import static ru.practicum.shareit.item.ItemMapper.*;
 
 @Slf4j
 @Service
-public class ItemServiceImp implements ItemService {
-    private final UserStorage uStorage;
-    private final ItemStorage iStorage;
+public class ItemServiceImpl implements ItemService {
+    private final UserStorage userStorage;
+    private final ItemStorage itemStorage;
 
-    public ItemServiceImp(UserStorage uStorage, ItemStorage iStorage) {
-        this.uStorage = uStorage;
-        this.iStorage = iStorage;
+    public ItemServiceImpl(UserStorage userStorage, ItemStorage itemStorage) {
+        this.userStorage = userStorage;
+        this.itemStorage = itemStorage;
     }
 
     @Override
     public ItemDto add(ItemDto itemDto, Long userId) {
-        User user = uStorage.takeById(userId).orElseThrow(() -> new NotFoundException("Не удалось найти пользователя с id: " + userId));
+        User user = userStorage.takeById(userId).orElseThrow(() -> new NotFoundException("Не удалось найти пользователя с id: " + userId));
         Item item = createItem(itemDto);
         item.setOwner(user);
-        iStorage.add(item);
+        itemStorage.add(item);
         return createItemDto(item);
     }
 
     @Override
     public ItemDto update(ItemDto itemDto, Long id, Long userId) {
-        Item item = iStorage.get(id).orElseThrow(() -> new NotFoundException("Не найдена вещь с id: " + id));
+        Item item = itemStorage.get(id).orElseThrow(() -> new NotFoundException("Не найдена вещь с id: " + id));
         if (item.getOwner() != null && !item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("У данного пользователя нет вещи.");
         }
@@ -49,25 +52,24 @@ public class ItemServiceImp implements ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
-        item.setId(id);
-        iStorage.update(item);
+        itemStorage.update(item);
         return createItemDto(item);
     }
 
     @Override
     public ItemDto get(Long id) {
-        Item item = iStorage.get(id).orElseThrow(() -> new NotFoundException("Не найдена вещь с id: " + id));
+        Item item = itemStorage.get(id).orElseThrow(() -> new NotFoundException("Не найдена вещь с id: " + id));
         return createItemDto(item);
     }
 
     @Override
     public List<ItemDto> getAll(Long userId) {
-        List<ItemDto> items = new ArrayList<>();
-        for (Item item : iStorage.getAll()) {
+        List<ItemDto> items = itemStorage.getAll().stream().filter(item -> item.getOwner() != null && userId.equals(item.getOwner().getId())).map(ItemMapper::createItemDto).collect(Collectors.toList());
+        /*for (Item item : itemStorage.getAll()) {
             if (item.getOwner() != null && userId.equals(item.getOwner().getId())) {
                 items.add(createItemDto(item));
             }
-        }
+        }*/
         return items;
     }
 
@@ -77,7 +79,7 @@ public class ItemServiceImp implements ItemService {
         if (text.isBlank()) {
             return founded;
         }
-        for (Item item : iStorage.getAll()) {
+        for (Item item : itemStorage.getAll()) {
             if (found(text, item)) {
                 founded.add(createItemDto(item));
             }

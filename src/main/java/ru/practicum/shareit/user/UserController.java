@@ -2,10 +2,8 @@ package ru.practicum.shareit.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
@@ -19,45 +17,36 @@ import java.util.Collection;
 @RestController
 @RequestMapping(path = "/users")
 public class UserController {
-    private final UserService uService;
+    private final UserService userService;
 
     @Autowired
     public UserController(UserService uService) {
-        this.uService = uService;
+        this.userService = uService;
     }
 
     @PostMapping
-    public UserDto add(@Validated @RequestBody User user, Errors errors) {
-        if (errors.hasErrors()) {
-            throw new ValidationException("Произошла ошибка." + errors.getAllErrors());
-        } else {
-            return uService.add(user);
-        }
+    public UserDto add(@Validated @RequestBody User user) {
+        return userService.add(user);
     }
 
     @GetMapping
     public Collection<UserDto> getAll() {
-        return uService.getAll();
+        return userService.getAll();
     }
 
     @GetMapping("/{id}")
     public UserDto get(@PathVariable Long id) {
-        return uService.get(id);
+        return userService.get(id);
     }
 
     @PatchMapping("/{id}")
     public UserDto update(@RequestBody User user,
-                          @PathVariable Long id,
-                          Errors errors) {
-        if (errors.hasErrors()) {
-            throw new ValidationException("Произошла ошибка." + errors.getAllErrors());
-        } else {
-            return uService.update(user, id);
-        }
+                          @PathVariable Long id) {
+        return userService.update(user, id);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        uService.delete(id);
+        userService.delete(id);
     }
 }

@@ -9,18 +9,17 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static ru.practicum.shareit.user.UserMapper.*;
 
 @Slf4j
 @Service
-public class UserServiceImp implements UserService {
-    private final UserStorage uStorage;
+public class UserServiceImpl implements UserService {
+    private final UserStorage userStorage;
 
-    public UserServiceImp(UserStorage uStorage) {
-        this.uStorage = uStorage;
+    public UserServiceImpl(UserStorage userStorage) {
+        this.userStorage = userStorage;
     }
 
     @Override
@@ -28,13 +27,13 @@ public class UserServiceImp implements UserService {
         if (!checkEmail(user.getId(), user.getEmail())) {
             log.error("Email: " + user.getEmail() + " занят!");
         }
-        return createUserDto(uStorage.add(user));
+        return createUserDto(userStorage.add(user));
     }
 
     @Override
     public UserDto update(User user, long id) {
         user.setId(id);
-        User updated = uStorage.takeById(id).orElseThrow(() -> new NotFoundException("Пользователь не найден с таким id: " + id));
+        User updated = userStorage.takeById(id).orElseThrow(() -> new NotFoundException("Пользователь не найден с таким id: " + id));
         if (user.getName() != null) {
             updated.setName(user.getName());
         }
@@ -42,31 +41,31 @@ public class UserServiceImp implements UserService {
             checkEmail(user.getId(), user.getEmail());
             updated.setEmail(user.getEmail());
         }
-        return createUserDto(uStorage.update(updated));
+        return createUserDto(userStorage.update(updated));
     }
 
     @Override
     public void delete(Long id) {
-        uStorage.delete(id);
+        userStorage.delete(id);
     }
 
     @Override
     public UserDto get(Long id) {
-        User user = uStorage.takeById(id).orElseThrow(() -> new NotFoundException("Пользователь не найден с таким id: " + id));
+        User user = userStorage.takeById(id).orElseThrow(() -> new NotFoundException("Пользователь не найден с таким id: " + id));
         return createUserDto(user);
     }
 
     @Override
-    public Collection<UserDto> getAll() {
+    public List<UserDto> getAll() {
         List<UserDto> users = new ArrayList<>();
-        for (User user : uStorage.takeAll()) {
+        for (User user : userStorage.takeAll()) {
             users.add(createUserDto(user));
         }
         return users;
     }
 
     public boolean checkEmail(Long id, String email) {
-        for (User user : uStorage.takeAll()) {
+        for (User user : userStorage.takeAll()) {
             if (user.getEmail().equals(email) && !(user.getId().equals(id))) {
                 throw new NotUniqueException("Email: " + email + " занят!");
             }

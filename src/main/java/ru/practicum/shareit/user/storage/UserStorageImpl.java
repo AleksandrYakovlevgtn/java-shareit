@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class UserStorageImp implements UserStorage {
+public class UserStorageImpl implements UserStorage {
     private Long id = 0L;
     private final Map<Long, User> users = new HashMap<>();
 
