@@ -9,6 +9,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static ru.practicum.shareit.user.UserMapper.*;
@@ -56,7 +57,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getAll() {
+    public Collection<UserDto> getAll() {
         List<UserDto> users = new ArrayList<>();
         for (User user : userStorage.takeAll()) {
             users.add(createUserDto(user));

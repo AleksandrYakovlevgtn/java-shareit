@@ -34,7 +34,7 @@ public class ItemStorageImpl implements ItemStorage {
     }
 
     @Override
-    public List<Item> getAll() {
-        return (List<Item>) items.values();
+    public Collection<Item> getAll() {
+        return items.values();
     }
 }
