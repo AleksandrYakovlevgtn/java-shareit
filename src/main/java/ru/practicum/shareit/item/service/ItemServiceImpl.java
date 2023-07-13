@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.Arrays.stream;
 import static ru.practicum.shareit.item.ItemMapper.*;
 
 @Slf4j
