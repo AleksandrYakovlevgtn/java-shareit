@@ -27,4 +27,8 @@ public class ErrorHandler {
     public ErrorResponse handlerBadRequestException(final NotUniqueException o) {
         return new ErrorResponse("Неверный запрос: ", o.getMessage());
     }
+
+    public ErrorResponse commonHandler(Exception o) {
+        return new ErrorResponse("Ошибка ", o.getMessage());
+    }
 }
