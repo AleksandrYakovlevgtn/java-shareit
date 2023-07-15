@@ -28,6 +28,8 @@ public class ErrorHandler {
         return new ErrorResponse("Неверный запрос: ", o.getMessage());
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse commonHandler(Exception o) {
         return new ErrorResponse("Ошибка ", o.getMessage());
     }
