@@ -1,22 +1,41 @@
 package ru.practicum.shareit.user.model;
 
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
+import javax.persistence.*;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
+import java.util.Objects;
 
-/**
- * TODO Sprint add-controllers.
- */
-@Data
-@Builder
-@AllArgsConstructor
+@Entity
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "users", schema = "public", uniqueConstraints = @UniqueConstraint(columnNames = {"email"}))
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
-    private Long id;
-    @NonNull
-    private String name;
-    @NotBlank(message = "Email должен быть заполнен.")
-    @Email(message = "Ошибку в email.")
-    private String email;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+
+    @Column
+    String name;
+
+    @Email
+    @Column(nullable = false)
+    String email;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        return id != null && id.equals(((User) o).getId());
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, email);
+    }
 }

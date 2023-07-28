@@ -1,28 +1,48 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.mapper;
 
-import lombok.experimental.UtilityClass;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import ru.practicum.shareit.booking.dto.BookingItemDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.comment.dto.CommentRequestDto;
+import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemExtendedDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
-@UtilityClass
-public class ItemMapper {
-    public ItemDto createItemDto(Item item) {
-        return ItemDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getAvailable())
-                .request(item.getRequest())
-                .build();
-    }
+import java.time.LocalDateTime;
+import java.util.List;
 
-    public Item createItem(ItemDto itemDto) {
-        return Item.builder()
-                .id(itemDto.getId())
-                .name(itemDto.getName())
-                .description(itemDto.getDescription())
-                .available(itemDto.getAvailable())
-                .request(itemDto.getRequest())
-                .build();
-    }
+@Mapper(componentModel = "spring")
+public interface ItemMapper {
+    @Mapping(target = "ownerId", expression = "java(item.getOwner().getId())")
+    ItemDto toItemDto(Item item);
+
+    @Mapping(target = "id", expression = "java(itemDto.getId())")
+    @Mapping(target = "name", expression = "java(itemDto.getName())")
+    @Mapping(target = "owner", expression = "java(user)")
+    Item toItem(ItemDto itemDto, User user);
+
+    @Mapping(target = "id", expression = "java(item.getId())")
+    @Mapping(target = "ownerId", expression = "java(item.getOwner().getId())")
+    @Mapping(target = "lastBooking", expression = "java(lastBooking)")
+    @Mapping(target = "nextBooking", expression = "java(nextBooking)")
+    @Mapping(target = "comments", expression = "java(comments)")
+    ItemExtendedDto toItemExtendedDto(Item item, BookingItemDto lastBooking, BookingItemDto nextBooking,
+                                      List<CommentDto> comments);
+
+    @Mapping(target = "bookerId", expression = "java(booking.getBooker().getId())")
+    BookingItemDto bookingToBookingItemDto(Booking booking);
+
+    @Mapping(target = "id", expression = "java(null)")
+    @Mapping(target = "created", expression = "java(dateTime)")
+    @Mapping(target = "author", expression = "java(user)")
+    @Mapping(target = "item", expression = "java(item)")
+    Comment commentRequestDtoToComment(CommentRequestDto commentRequestDto, LocalDateTime dateTime, User user, Item item);
+
+    @Mapping(target = "authorName", expression = "java(comment.getAuthor().getName())")
+    @Mapping(target = "created", expression = "java(comment.getCreated())")
+    CommentDto commentToCommentDto(Comment comment);
 }

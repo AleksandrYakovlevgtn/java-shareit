@@ -1,17 +1,22 @@
 package ru.practicum.shareit.request;
 
-import lombok.Data;
-import ru.practicum.shareit.user.model.User;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
+import javax.persistence.Table;
+import java.util.Date;
 
-/**
- * TODO Sprint add-item-requests.
- */
-@Data
+@Getter
+@Setter
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "requests")
 public class ItemRequest {
-    private Long id;
-    private String description;
-    private User requester;
-    private LocalDateTime created;
+    Long id;
+    String description;
+    Long requester;
+    Date created;
 }

@@ -1,76 +1,68 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.NotUniqueException;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.user.UserMapper.*;
-
-@Slf4j
 @Service
+@Slf4j
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserStorage userStorage) {
-        this.userStorage = userStorage;
+    @Override
+    @Transactional
+    public UserDto add(UserDto userDto) {
+        return userMapper.toUserDto(userRepository.save(userMapper.toUser(userDto)));
     }
 
     @Override
-    public UserDto add(User user) {
-        if (!checkEmail(user.getId(), user.getEmail())) {
-            log.error("Email: " + user.getEmail() + " занят!");
+    @Transactional
+    public UserDto update(Long id, UserDto userDto) {
+        User repoUser = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Пользователя не существует."));
+
+        userDto.setId(id);
+        User user = userMapper.toUser(userDto);
+
+        if (user.getEmail() != null) {
+            repoUser.setEmail(user.getEmail());
         }
-        return createUserDto(userStorage.add(user));
-    }
-
-    @Override
-    public UserDto update(User user, long id) {
-        user.setId(id);
-        User updated = userStorage.takeById(id).orElseThrow(() -> new NotFoundException("Пользователь не найден с таким id: " + id));
         if (user.getName() != null) {
-            updated.setName(user.getName());
+            repoUser.setName(user.getName());
         }
-        if (user.getEmail() != null && !user.getEmail().equals(updated.getEmail())) {
-            checkEmail(user.getId(), user.getEmail());
-            updated.setEmail(user.getEmail());
-        }
-        return createUserDto(userStorage.update(updated));
+        return userMapper.toUserDto(userRepository.save(repoUser));
     }
 
     @Override
+    public List<UserDto> getAll() {
+        return userRepository.findAll().stream().map(userMapper::toUserDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public UserDto getById(Long id) {
+        return userMapper.toUserDto(userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователя не существует.")));
+    }
+
+    @Override
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new NotFoundException("Пользователя не существует."));
+    }
+
+    @Override
+    @Transactional
     public void delete(Long id) {
-        userStorage.delete(id);
-    }
-
-    @Override
-    public UserDto get(Long id) {
-        User user = userStorage.takeById(id).orElseThrow(() -> new NotFoundException("Пользователь не найден с таким id: " + id));
-        return createUserDto(user);
-    }
-
-    @Override
-    public Collection<UserDto> getAll() {
-        List<UserDto> users = new ArrayList<>();
-        for (User user : userStorage.takeAll()) {
-            users.add(createUserDto(user));
-        }
-        return users;
-    }
-
-    public boolean checkEmail(Long id, String email) {
-        for (User user : userStorage.takeAll()) {
-            if (user.getEmail().equals(email) && !(user.getId().equals(id))) {
-                throw new NotUniqueException("Email: " + email + " занят!");
-            }
-        }
-        return true;
+        userRepository.deleteById(id);
     }
 }
