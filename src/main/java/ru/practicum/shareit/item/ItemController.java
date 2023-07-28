@@ -21,6 +21,7 @@ import java.util.List;
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService itemService;
+
     @GetMapping
     public List<ItemExtendedDto> getByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId) {
         return itemService.getByOwnerId(userId);

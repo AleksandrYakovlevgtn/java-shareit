@@ -23,7 +23,6 @@ public class User {
 
     @Column
     String name;
-
     @Email
     @Column(nullable = false)
     String email;
@@ -34,6 +33,7 @@ public class User {
         if (!(o instanceof User)) return false;
         return id != null && id.equals(((User) o).getId());
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(id, name, email);
