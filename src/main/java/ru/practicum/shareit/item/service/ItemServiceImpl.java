@@ -82,38 +82,13 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemExtendedDto> getByOwnerId(Long userId) {
         List<Item> items = itemRepository.getAllByOwnerIdOrderByIdAsc(userId);
-        List<Long> itemIds = items.stream()
-                .map(Item::getId)
-                .collect(Collectors.toList());
-        Map<Item, List<Comment>> commentsByItem = commentRepository.findByItemIdIn(itemIds)
-                .stream()
-                .collect(Collectors.groupingBy(Comment::getItem));
-        Map<Item, List<Booking>> bookingsByItem = bookingRepository.findByItemIdIn(itemIds)
-                .stream()
-                .collect(Collectors.groupingBy(Booking::getItem));
+        List<Long> itemIds = items.stream().map(Item::getId).collect(Collectors.toList());
+        Map<Item, List<Comment>> commentsByItem = commentRepository.findByItemIdIn(itemIds).stream().collect(Collectors.groupingBy(Comment::getItem));
+        Map<Item, List<Booking>> bookingsByItem = bookingRepository.findByItemIdIn(itemIds).stream().collect(Collectors.groupingBy(Booking::getItem));
 
-        Map<Long, List<CommentDto>> commentDtosByItem = new HashMap<>();
-        for (Item item : items) {
-            if (commentsByItem.get(item) == null) {
-                commentDtosByItem.put(item.getId(), new ArrayList<>());
-            } else {
-                commentDtosByItem.put(item.getId(), commentsByItem.get(item)
-                        .stream()
-                        .map(itemMapper::commentToCommentDto)
-                        .collect(Collectors.toList()));
-            }
-        }
-        Map<Long, List<BookingItemDto>> bookingDtosByItem = new HashMap<>();
-        for (Item item : items) {
-            if (bookingsByItem.get(item) != null) {
-                bookingDtosByItem.put(item.getId(), bookingsByItem.get(item)
-                        .stream()
-                        .filter(Booking -> Booking.getStatus().equals(Status.APPROVED))
-                        .map(itemMapper::bookingToBookingItemDto)
-                        .sorted(Comparator.comparing(BookingItemDto::getStart))
-                        .collect(Collectors.toList()));
-            }
-        }
+        Map<Long, List<CommentDto>> commentDtosByItem = commentDtosByItem(items, commentsByItem);
+        Map<Long, List<BookingItemDto>> bookingDtosByItem = bookingDtosByItem(items, bookingsByItem);
+
         Map<Long, BookingItemDto> lastBookingByItem = new HashMap<>();
         Map<Long, BookingItemDto> nextBookingByItem = new HashMap<>();
         for (Item item : items) {
@@ -198,5 +173,35 @@ public class ItemServiceImpl implements ItemService {
 
     private List<CommentDto> addComment(Item item) {
         return commentRepository.findByItemId(item.getId()).stream().map(itemMapper::commentToCommentDto).collect(Collectors.toList());
+    }
+
+    private Map<Long, List<CommentDto>> commentDtosByItem(List<Item> items, Map<Item, List<Comment>> commentsByItem) {
+        Map<Long, List<CommentDto>> commentDtosByItem = new HashMap<>();
+        for (Item item : items) {
+            if (commentsByItem.get(item) == null) {
+                commentDtosByItem.put(item.getId(), new ArrayList<>());
+            } else {
+                commentDtosByItem.put(item.getId(), commentsByItem.get(item)
+                        .stream()
+                        .map(itemMapper::commentToCommentDto)
+                        .collect(Collectors.toList()));
+            }
+        }
+        return commentDtosByItem;
+    }
+
+    private Map<Long, List<BookingItemDto>> bookingDtosByItem(List<Item> items, Map<Item, List<Booking>> bookingsByItem) {
+        Map<Long, List<BookingItemDto>> bookingDtosByItem = new HashMap<>();
+        for (Item item : items) {
+            if (bookingsByItem.get(item) != null) {
+                bookingDtosByItem.put(item.getId(), bookingsByItem.get(item)
+                        .stream()
+                        .filter(Booking -> Booking.getStatus().equals(Status.APPROVED))
+                        .map(itemMapper::bookingToBookingItemDto)
+                        .sorted(Comparator.comparing(BookingItemDto::getStart))
+                        .collect(Collectors.toList()));
+            }
+        }
+        return bookingDtosByItem;
     }
 }

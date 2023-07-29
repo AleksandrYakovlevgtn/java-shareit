@@ -47,23 +47,13 @@ public class BookingServiceImpl implements BookingService {
         if (!item.getAvailable()) {
             throw new BookingException("Предмет недоступен для брони.");
         }
-        if (!bookingRepository.findByItemIdAndStartBeforeAndEndAfterAndStatusEqualsOrderByStartAsc(item.getId(),
+        Boolean findByItemIdAndStartBeforeAndEndAfterAndStatusEqualsOrderByStart = !bookingRepository.findByItemIdAndStartBeforeAndEndAfterAndStatusEqualsOrderByStartAsc(item.getId(),
                 bookingRequestDto.getStart(),
-                bookingRequestDto.getEnd(), Status.APPROVED).isEmpty()
-                || !bookingRepository.findByItemIdAndStartAfterAndEndBeforeAndStatusEqualsOrderByStartAsc(item.getId(),
+                bookingRequestDto.getEnd(), Status.APPROVED).isEmpty();
+        Boolean findByItemIdAndStartAfterAndEndBeforeAndStatusEqualsOrderByStart = !bookingRepository.findByItemIdAndStartAfterAndEndBeforeAndStatusEqualsOrderByStartAsc(item.getId(),
                 bookingRequestDto.getStart(),
-                bookingRequestDto.getEnd(), Status.APPROVED).isEmpty()
-                || !bookingRepository.findByItemId(item.getId())
-                .stream().filter(booking -> booking.getStart().isBefore(bookingRequestDto.getStart()) &&
-                        booking.getEnd().isBefore(bookingRequestDto.getEnd()) &&
-                        booking.getEnd().isAfter(bookingRequestDto.getStart()))
-                .collect(Collectors.toList()).isEmpty() || !bookingRepository.findByItemId(item.getId())
-                .stream()
-                .filter(booking -> booking.getStart().isAfter(bookingRequestDto.getStart()) &&
-                        booking.getStart().isBefore(bookingRequestDto.getEnd()) &&
-                        booking.getEnd().isAfter(bookingRequestDto.getEnd()))
-                .collect(Collectors.toList()).isEmpty()) {
-
+                bookingRequestDto.getEnd(), Status.APPROVED).isEmpty();
+        if (findByItemIdAndStartBeforeAndEndAfterAndStatusEqualsOrderByStart || findByItemIdAndStartAfterAndEndBeforeAndStatusEqualsOrderByStart) {
             throw new BookingException("Предмет недоступен для брони. В это время его еще кто-то использует!");
         }
 
