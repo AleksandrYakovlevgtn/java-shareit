@@ -164,6 +164,7 @@ public class BookingServiceImpl implements BookingService {
         return bookingRepository.findById(id).orElseThrow(() -> new NotFoundException("Бронь с таким id не существует."));
     }
 
+    @Override
     public BookingState checkStateValid(String bookingState) {
         return BookingState.stringToState(bookingState).orElseThrow(() -> new StateException("Unknown state: " + bookingState));
     }
