@@ -1,35 +1,36 @@
 package ru.practicum.shareit.item;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.comment.dto.CommentRequestDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemExtendedDto;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.markers.Create;
+import ru.practicum.shareit.markers.Update;
 
 import javax.validation.Valid;
-import java.util.Collection;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService itemService;
 
-    public ItemController(ItemService iService) {
-        this.itemService = iService;
-    }
-
     @GetMapping
-    public Collection<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemService.getAll(userId);
+    public List<ItemExtendedDto> getByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        return itemService.getByOwnerId(userId);
     }
 
     @GetMapping("/{id}")
-    public ItemDto get(@PathVariable Long id) {
-        return itemService.get(id);
+    public ItemExtendedDto getById(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                   @PathVariable Long id) {
+        return itemService.getById(userId, id);
     }
 
     @GetMapping("/search")
@@ -39,14 +40,26 @@ public class ItemController {
 
     @PostMapping
     public ItemDto add(@RequestHeader("X-Sharer-User-Id") Long userId,
-                       @Valid @RequestBody ItemDto itemDto) {
-        return itemService.add(itemDto, userId);
+                       @Validated(Create.class) @RequestBody ItemDto itemDto) {
+        return itemService.add(userId, itemDto);
+    }
+
+    @PostMapping("{id}/comment")
+    public CommentDto addComment(@RequestHeader("X-Sharer-User-Id") long userId,
+                                 @PathVariable long id,
+                                 @Valid @RequestBody CommentRequestDto commentRequestDto) {
+        return itemService.addComment(userId, id, commentRequestDto);
     }
 
     @PatchMapping("/{id}")
-    public ItemDto update(@RequestBody ItemDto itemDto,
+    public ItemDto update(@RequestHeader("X-Sharer-User-Id") Long userId,
                           @PathVariable Long id,
-                          @RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemService.update(itemDto, id, userId);
+                          @Validated(Update.class) @RequestBody ItemDto itemDto) {
+        return itemService.update(userId, id, itemDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        itemService.delete(id);
     }
 }
