@@ -45,6 +45,7 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

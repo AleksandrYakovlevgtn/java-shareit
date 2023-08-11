@@ -34,6 +34,7 @@ public class ItemRequest {
 
     @Column(nullable = false)
     LocalDateTime created;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
