@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.request.model;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -7,47 +7,42 @@ import org.hibernate.annotations.OnDeleteAction;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Entity
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "items", schema = "public")
+@Entity
+@Table(name = "request", schema = "public")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Item {
+public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     @Column(nullable = false)
-    String name;
-
-    @Column(nullable = false)
     String description;
-
-    @Column(nullable = false)
-    Boolean available;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false)
-    User owner;
+    @JoinColumn(name = "requester_id", referencedColumnName = "id", nullable = false)
+    User requesterId;
 
-    @Column(name = "request_id")
-    Long requestId;
+    @Column(nullable = false)
+    LocalDateTime created;
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Item)) return false;
-        return id != null && id.equals(((Item) o).getId());
+        if (!(o instanceof ItemRequest)) return false;
+        return id != null && id.equals(((ItemRequest) o).getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, available, owner, requestId);
+        return Objects.hash(id, description, requesterId, created);
     }
 }
