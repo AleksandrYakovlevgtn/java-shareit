@@ -78,10 +78,6 @@ public class BookingServiceImpl implements BookingService {
         if (!userId.equals(repoBooking.getItem().getOwner().getId())) {
             throw new NotFoundException("Изменение статуса брони доступно только владельцу.");
         }
-        if (repoBooking.getEnd().isBefore(LocalDateTime.now())) {
-            repoBooking.setStatus(Status.CANCELED);
-            throw new BookingException("Срок бронирования истек.");
-        }
         repoBooking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         return bookingMapper.bookingToBookingResponseDto(bookingRepository.save(repoBooking));
     }
