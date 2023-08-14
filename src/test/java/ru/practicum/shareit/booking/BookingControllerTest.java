@@ -115,7 +115,7 @@ public class BookingControllerTest {
                             .characterEncoding(StandardCharsets.UTF_8)
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isInternalServerError());
+                    .andExpect(status().isBadRequest());
 
             verify(bookingService, never()).add(ArgumentMatchers.any(), ArgumentMatchers.any());
         }
@@ -131,7 +131,7 @@ public class BookingControllerTest {
                             .characterEncoding(StandardCharsets.UTF_8)
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isInternalServerError());
+                    .andExpect(status().isBadRequest());
 
             verify(bookingService, never()).add(ArgumentMatchers.any(), ArgumentMatchers.any());
         }
@@ -146,7 +146,7 @@ public class BookingControllerTest {
                             .characterEncoding(StandardCharsets.UTF_8)
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isInternalServerError());
+                    .andExpect(status().isBadRequest());
 
             verify(bookingService, never()).add(ArgumentMatchers.any(), ArgumentMatchers.any());
         }
