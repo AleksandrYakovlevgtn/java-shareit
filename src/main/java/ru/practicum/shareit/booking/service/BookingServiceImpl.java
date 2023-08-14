@@ -15,7 +15,6 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.BookingException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.StateException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
@@ -160,10 +159,5 @@ public class BookingServiceImpl implements BookingService {
 
     private Booking getBookingById(Long id) {
         return bookingRepository.findById(id).orElseThrow(() -> new NotFoundException("Бронь с таким id не существует."));
-    }
-
-    @Override
-    public State checkStateValid(String bookingState) {
-        return State.stringToState(bookingState).orElseThrow(() -> new StateException("Unknown state: " + bookingState));
     }
 }

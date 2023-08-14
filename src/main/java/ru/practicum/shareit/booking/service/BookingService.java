@@ -17,6 +17,4 @@ public interface BookingService {
     List<BookingResponseDto> getAllByBookerId(Long userId, State state, Pageable pageable);
 
     List<BookingResponseDto> getAllByOwnerId(Long userId, State state, Pageable pageable);
-
-    State checkStateValid(String state);
 }
