@@ -105,6 +105,23 @@ public class BookingControllerTest {
     @Nested
     class Add {
         @Test
+        public void shouldAdd() throws Exception {
+            when(bookingService.add(ArgumentMatchers.eq(user2.getId()), ArgumentMatchers.any(BookingRequestDto.class)))
+                    .thenReturn(bookingResponseDto1);
+
+            mvc.perform(post("/bookings")
+                            .header(Constants.headerUserId, user2.getId())
+                            .content(mapper.writeValueAsString(bookingRequestDto))
+                            .characterEncoding(StandardCharsets.UTF_8)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(content().json(mapper.writeValueAsString(bookingResponseDto1)));
+
+            verify(bookingService, times(1)).add(ArgumentMatchers.eq(user2.getId()),
+                    ArgumentMatchers.any(BookingRequestDto.class));
+        }
+        @Test
         public void shouldThrowExceptionIfStartInPast() throws Exception {
             bookingRequestDto.setStart(LocalDateTime.now().minusMinutes(5));
             bookingRequestDto.setEnd(LocalDateTime.now().plusMinutes(10));
@@ -115,7 +132,7 @@ public class BookingControllerTest {
                             .characterEncoding(StandardCharsets.UTF_8)
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isInternalServerError());
+                    .andExpect(status().isBadRequest());
 
             verify(bookingService, never()).add(ArgumentMatchers.any(), ArgumentMatchers.any());
         }
@@ -131,7 +148,7 @@ public class BookingControllerTest {
                             .characterEncoding(StandardCharsets.UTF_8)
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isInternalServerError());
+                    .andExpect(status().isBadRequest());
 
             verify(bookingService, never()).add(ArgumentMatchers.any(), ArgumentMatchers.any());
         }
@@ -146,7 +163,7 @@ public class BookingControllerTest {
                             .characterEncoding(StandardCharsets.UTF_8)
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isInternalServerError());
+                    .andExpect(status().isBadRequest());
 
             verify(bookingService, never()).add(ArgumentMatchers.any(), ArgumentMatchers.any());
         }
