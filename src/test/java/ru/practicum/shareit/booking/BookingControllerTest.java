@@ -121,6 +121,7 @@ public class BookingControllerTest {
             verify(bookingService, times(1)).add(ArgumentMatchers.eq(user2.getId()),
                     ArgumentMatchers.any(BookingRequestDto.class));
         }
+
         @Test
         public void shouldThrowExceptionIfStartInPast() throws Exception {
             bookingRequestDto.setStart(LocalDateTime.now().minusMinutes(5));
