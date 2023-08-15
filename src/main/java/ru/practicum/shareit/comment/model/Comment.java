@@ -34,7 +34,6 @@ public class Comment {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "author_id", referencedColumnName = "id", nullable = false)
     User author;
-
     @Column(name = "item_id")
     Long itemId;
 

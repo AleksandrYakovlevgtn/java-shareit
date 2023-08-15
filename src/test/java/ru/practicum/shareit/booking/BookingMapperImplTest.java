@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -58,68 +57,62 @@ public class BookingMapperImplTest {
     @InjectMocks
     private BookingMapperImpl bookingMapper;
 
-    @Nested
-    class RequestDtoToBooking {
-        @Test
-        public void shouldReturnBooking() {
-            Booking result = bookingMapper.requestDtoToBooking(bookingRequestDto, item, user, status);
+    @Test
+    public void shouldReturnBooking() {
+        Booking result = bookingMapper.requestDtoToBooking(bookingRequestDto, item, user, status);
 
-            assertNull(result.getId());
-            assertEquals(status, result.getStatus());
-            assertEquals(bookingRequestDto.getStart(), result.getStart());
-            assertEquals(bookingRequestDto.getEnd(), result.getEnd());
-            assertEquals(user.getId(), result.getBooker().getId());
-            assertEquals(user.getName(), result.getBooker().getName());
-            assertEquals(user.getEmail(), result.getBooker().getEmail());
-            assertEquals(bookingRequestDto.getItemId(), result.getItem().getId());
-            assertEquals(item.getDescription(), result.getItem().getDescription());
-            assertEquals(item.getAvailable(), result.getItem().getAvailable());
-            assertEquals(item.getName(), result.getItem().getName());
-            assertEquals(item.getOwner().getId(), result.getItem().getOwner().getId());
-            assertEquals(item.getOwner().getName(), result.getItem().getOwner().getName());
-            assertEquals(item.getOwner().getEmail(), result.getItem().getOwner().getEmail());
-        }
-
-        @Test
-        public void shouldReturnNull() {
-            Booking result = bookingMapper.requestDtoToBooking(null, null,
-                    null, null);
-
-            assertNull(result);
-        }
+        assertNull(result.getId());
+        assertEquals(status, result.getStatus());
+        assertEquals(bookingRequestDto.getStart(), result.getStart());
+        assertEquals(bookingRequestDto.getEnd(), result.getEnd());
+        assertEquals(user.getId(), result.getBooker().getId());
+        assertEquals(user.getName(), result.getBooker().getName());
+        assertEquals(user.getEmail(), result.getBooker().getEmail());
+        assertEquals(bookingRequestDto.getItemId(), result.getItem().getId());
+        assertEquals(item.getDescription(), result.getItem().getDescription());
+        assertEquals(item.getAvailable(), result.getItem().getAvailable());
+        assertEquals(item.getName(), result.getItem().getName());
+        assertEquals(item.getOwner().getId(), result.getItem().getOwner().getId());
+        assertEquals(item.getOwner().getName(), result.getItem().getOwner().getName());
+        assertEquals(item.getOwner().getEmail(), result.getItem().getOwner().getEmail());
     }
 
-    @Nested
-    class BookingToBookingResponseDto {
-        @Test
-        public void shouldReturnBookingResponseDto() {
-            when(userMapper.toUserDto(any())).thenCallRealMethod();
-            when(itemMapper.toItemDto(any())).thenCallRealMethod();
+    @Test
+    public void shouldReturnNulls() {
+        Booking result = bookingMapper.requestDtoToBooking(null, null,
+                null, null);
 
-            BookingResponseDto result = bookingMapper.bookingToBookingResponseDto(booking);
+        assertNull(result);
+    }
 
-            assertEquals(booking.getId(), result.getId());
-            assertEquals(booking.getStart(), result.getStart());
-            assertEquals(booking.getEnd(), result.getEnd());
-            assertEquals(booking.getStatus(), result.getStatus());
-            assertEquals(booking.getBooker().getId(), result.getBooker().getId());
-            assertEquals(booking.getBooker().getName(), result.getBooker().getName());
-            assertEquals(booking.getBooker().getEmail(), result.getBooker().getEmail());
-            assertEquals(booking.getItem().getId(), result.getItem().getId());
-            assertEquals(booking.getItem().getName(), result.getItem().getName());
-            assertEquals(booking.getItem().getDescription(), result.getItem().getDescription());
-            assertEquals(booking.getItem().getAvailable(), result.getItem().getAvailable());
-            assertEquals(booking.getItem().getOwner().getId(), result.getItem().getOwnerId());
-            assertEquals(booking.getItem().getRequestId(), result.getItem().getRequestId());
-            verify(userMapper, times(1)).toUserDto(any());
-            verify(itemMapper, times(1)).toItemDto(any());
-        }
+    @Test
+    public void shouldReturnBookingResponseDto() {
+        when(userMapper.toUserDto(any())).thenCallRealMethod();
+        when(itemMapper.toItemDto(any())).thenCallRealMethod();
 
-        @Test
-        public void shouldReturnNull() {
-            BookingResponseDto result = bookingMapper.bookingToBookingResponseDto(null);
+        BookingResponseDto result = bookingMapper.bookingToBookingResponseDto(booking);
 
-            assertNull(result);
-        }
+        assertEquals(booking.getId(), result.getId());
+        assertEquals(booking.getStart(), result.getStart());
+        assertEquals(booking.getEnd(), result.getEnd());
+        assertEquals(booking.getStatus(), result.getStatus());
+        assertEquals(booking.getBooker().getId(), result.getBooker().getId());
+        assertEquals(booking.getBooker().getName(), result.getBooker().getName());
+        assertEquals(booking.getBooker().getEmail(), result.getBooker().getEmail());
+        assertEquals(booking.getItem().getId(), result.getItem().getId());
+        assertEquals(booking.getItem().getName(), result.getItem().getName());
+        assertEquals(booking.getItem().getDescription(), result.getItem().getDescription());
+        assertEquals(booking.getItem().getAvailable(), result.getItem().getAvailable());
+        assertEquals(booking.getItem().getOwner().getId(), result.getItem().getOwnerId());
+        assertEquals(booking.getItem().getRequestId(), result.getItem().getRequestId());
+        verify(userMapper, times(1)).toUserDto(any());
+        verify(itemMapper, times(1)).toItemDto(any());
+    }
+
+    @Test
+    public void shouldReturnNull() {
+        BookingResponseDto result = bookingMapper.bookingToBookingResponseDto(null);
+
+        assertNull(result);
     }
 }
