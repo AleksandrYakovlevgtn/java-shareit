@@ -1,7 +1,5 @@
 package ru.practicum.shareit.request;
 
-
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -112,142 +110,130 @@ public class ItemRequestServiceImplTest {
         assertEquals(item.getOwner().getId(), resultItemDto.getOwnerId());
     }
 
-    @Nested
-    class Create {
-        @Test
-        public void shouldCreate() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(itemRequestMapper.toItemRequest(any(), any(), any())).thenCallRealMethod();
-            when(itemRequestRepository.save(any())).thenReturn(itemRequest1);
-            when(itemRequestMapper.toItemRequestDto(any())).thenCallRealMethod();
+    @Test
+    public void shouldCreate() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(itemRequestMapper.toItemRequest(any(), any(), any())).thenCallRealMethod();
+        when(itemRequestRepository.save(any())).thenReturn(itemRequest1);
+        when(itemRequestMapper.toItemRequestDto(any())).thenCallRealMethod();
 
-            ItemRequestDto result = itemRequestService.add(user2.getId(), item1RequestCreateDto);
+        ItemRequestDto result = itemRequestService.add(user2.getId(), item1RequestCreateDto);
 
-            verify(itemRequestRepository, times(1)).save(itemRequestArgumentCaptor.capture());
-            verify(itemRequestMapper, times(1)).toItemRequest(any(), any(), any());
+        verify(itemRequestRepository, times(1)).save(itemRequestArgumentCaptor.capture());
+        verify(itemRequestMapper, times(1)).toItemRequest(any(), any(), any());
 
-            ItemRequest savedItemRequest = itemRequestArgumentCaptor.getValue();
-            savedItemRequest.setId(result.getId());
+        ItemRequest savedItemRequest = itemRequestArgumentCaptor.getValue();
+        savedItemRequest.setId(result.getId());
 
-            assertEquals(itemRequest1, savedItemRequest);
-            assertEquals(item1RequestCreateDto.getDescription(), savedItemRequest.getDescription());
-            assertEquals(user2.getId(), savedItemRequest.getRequesterId().getId());
-            assertEquals(user2.getName(), savedItemRequest.getRequesterId().getName());
-            assertEquals(user2.getEmail(), savedItemRequest.getRequesterId().getEmail());
-            assertNotNull(savedItemRequest.getCreated());
-        }
+        assertEquals(itemRequest1, savedItemRequest);
+        assertEquals(item1RequestCreateDto.getDescription(), savedItemRequest.getDescription());
+        assertEquals(user2.getId(), savedItemRequest.getRequesterId().getId());
+        assertEquals(user2.getName(), savedItemRequest.getRequesterId().getName());
+        assertEquals(user2.getEmail(), savedItemRequest.getRequesterId().getEmail());
+        assertNotNull(savedItemRequest.getCreated());
     }
 
-    @Nested
-    class GetById {
-        @Test
-        public void shouldGet() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(itemRequestRepository.findById(1L)).thenReturn(Optional.of(itemRequest1));
-            when(itemRepository.findByRequestId(1L)).thenReturn(List.of(item1));
-            when(itemMapper.toItemDto(any())).thenCallRealMethod();
-            when(itemRequestMapper.toItemRequestExtendedDto(any(), any())).thenCallRealMethod();
+    @Test
+    public void shouldGet() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(itemRequestRepository.findById(1L)).thenReturn(Optional.of(itemRequest1));
+        when(itemRepository.findByRequestId(1L)).thenReturn(List.of(item1));
+        when(itemMapper.toItemDto(any())).thenCallRealMethod();
+        when(itemRequestMapper.toItemRequestExtendedDto(any(), any())).thenCallRealMethod();
 
-            ItemRequestExtendedDto result = itemRequestService.getById(user2.getId(), 1L);
+        ItemRequestExtendedDto result = itemRequestService.getById(user2.getId(), 1L);
 
-            checkItemRequestExtendedDto(itemRequest1, result);
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(itemRequestRepository, times(1)).findById(1L);
-            verify(itemRepository, times(1)).findByRequestId(1L);
-            verify(itemMapper, times(1)).toItemDto(any());
-            verify(itemRequestMapper, times(1)).toItemRequestExtendedDto(any(), any());
-        }
-
-        @Test
-        public void shouldThrowExceptionIfItemRequestIdNotFound() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(itemRequestRepository.findById(1L)).thenReturn(Optional.empty());
-
-            NotFoundException exception = assertThrows(NotFoundException.class,
-                    () -> itemRequestService.getById(user2.getId(), 1L));
-            assertEquals("Запроса вещи с таким id не существует.", exception.getMessage());
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(itemRequestRepository, times(1)).findById(1L);
-        }
+        checkItemRequestExtendedDto(itemRequest1, result);
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(itemRequestRepository, times(1)).findById(1L);
+        verify(itemRepository, times(1)).findByRequestId(1L);
+        verify(itemMapper, times(1)).toItemDto(any());
+        verify(itemRequestMapper, times(1)).toItemRequestExtendedDto(any(), any());
     }
 
-    @Nested
-    class GetByRequestorId {
-        @Test
-        public void shouldGet() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(itemRequestRepository.findByRequesterId_IdOrderByCreatedAsc(user2.getId()))
-                    .thenReturn(List.of(itemRequest1));
-            when(itemRepository.findByRequestIdIn(List.of(1L))).thenReturn(List.of(item1));
-            when(itemMapper.toItemDto(any())).thenCallRealMethod();
-            when(itemRequestMapper.toItemRequestExtendedDto(any(), any())).thenCallRealMethod();
+    @Test
+    public void shouldThrowExceptionIfItemRequestIdNotFound() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(itemRequestRepository.findById(1L)).thenReturn(Optional.empty());
 
-            List<ItemRequestExtendedDto> results = itemRequestService.getByRequesterId(user2.getId());
-
-            assertEquals(1, results.size());
-
-            ItemRequestExtendedDto result = results.get(0);
-
-            checkItemRequestExtendedDto(itemRequest1, result);
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(itemRequestRepository, times(1))
-                    .findByRequesterId_IdOrderByCreatedAsc(user2.getId());
-            verify(itemRepository, times(1)).findByRequestIdIn(List.of(1L));
-            verify(itemMapper, times(1)).toItemDto(any());
-            verify(itemRequestMapper, times(1)).toItemRequestExtendedDto(any(), any());
-        }
-
-        @Test
-        public void shouldGetEmptyIfNotItemRequests() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(itemRequestRepository.findByRequesterId_IdOrderByCreatedAsc(user1.getId()))
-                    .thenReturn(List.of());
-
-            List<ItemRequestExtendedDto> results = itemRequestService.getByRequesterId(user1.getId());
-
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(itemRequestRepository, times(1))
-                    .findByRequesterId_IdOrderByCreatedAsc(user1.getId());
-        }
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> itemRequestService.getById(user2.getId(), 1L));
+        assertEquals("Запроса вещи с таким id не существует.", exception.getMessage());
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(itemRequestRepository, times(1)).findById(1L);
     }
 
-    @Nested
-    class GetAll {
-        @Test
-        public void shouldGetNotSelfRequests() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(itemRequestRepository.findByRequesterId_IdNot(user1.getId(), pageable))
-                    .thenReturn(new PageImpl<>(List.of(itemRequest1)));
-            when(itemRequestMapper.toItemRequestExtendedDto(any(), any())).thenCallRealMethod();
+    @Test
+    public void shouldGetFromServiceReturn() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(itemRequestRepository.findByRequesterId_IdOrderByCreatedAsc(user2.getId()))
+                .thenReturn(List.of(itemRequest1));
+        when(itemRepository.findByRequestIdIn(List.of(1L))).thenReturn(List.of(item1));
+        when(itemMapper.toItemDto(any())).thenCallRealMethod();
+        when(itemRequestMapper.toItemRequestExtendedDto(any(), any())).thenCallRealMethod();
 
-            List<ItemRequestExtendedDto> results = itemRequestService.getAll(user1.getId(), pageable);
+        List<ItemRequestExtendedDto> results = itemRequestService.getByRequesterId(user2.getId());
+
+        assertEquals(1, results.size());
+
+        ItemRequestExtendedDto result = results.get(0);
+
+        checkItemRequestExtendedDto(itemRequest1, result);
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(itemRequestRepository, times(1))
+                .findByRequesterId_IdOrderByCreatedAsc(user2.getId());
+        verify(itemRepository, times(1)).findByRequestIdIn(List.of(1L));
+        verify(itemMapper, times(1)).toItemDto(any());
+        verify(itemRequestMapper, times(1)).toItemRequestExtendedDto(any(), any());
+    }
+
+    @Test
+    public void shouldGetEmptyIfNotItemRequests() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(itemRequestRepository.findByRequesterId_IdOrderByCreatedAsc(user1.getId()))
+                .thenReturn(List.of());
+
+        List<ItemRequestExtendedDto> results = itemRequestService.getByRequesterId(user1.getId());
+
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(itemRequestRepository, times(1))
+                .findByRequesterId_IdOrderByCreatedAsc(user1.getId());
+    }
+
+    @Test
+    public void shouldGetNotSelfRequests() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(itemRequestRepository.findByRequesterId_IdNot(user1.getId(), pageable))
+                .thenReturn(new PageImpl<>(List.of(itemRequest1)));
+        when(itemRequestMapper.toItemRequestExtendedDto(any(), any())).thenCallRealMethod();
+
+        List<ItemRequestExtendedDto> results = itemRequestService.getAll(user1.getId(), pageable);
 
 
-            assertEquals(1, results.size());
+        assertEquals(1, results.size());
 
-            ItemRequestExtendedDto result = results.get(0);
-            result.setItems(itemRequestExtendedDto1.getItems());
+        ItemRequestExtendedDto result = results.get(0);
+        result.setItems(itemRequestExtendedDto1.getItems());
 
-            checkItemRequestExtendedDto(itemRequest1, result);
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(itemRequestRepository, times(1))
-                    .findByRequesterId_IdNot(user1.getId(), pageable);
-            verify(itemRequestMapper, times(1)).toItemRequestExtendedDto(any(), any());
-        }
+        checkItemRequestExtendedDto(itemRequest1, result);
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(itemRequestRepository, times(1))
+                .findByRequesterId_IdNot(user1.getId(), pageable);
+        verify(itemRequestMapper, times(1)).toItemRequestExtendedDto(any(), any());
+    }
 
-        @Test
-        public void shouldGetEmptyIfNotRequests() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(itemRequestRepository.findByRequesterId_IdNot(user1.getId(), pageable))
-                    .thenReturn(new PageImpl<>(List.of()));
+    @Test
+    public void shouldGetEmptyIfNotRequests() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(itemRequestRepository.findByRequesterId_IdNot(user1.getId(), pageable))
+                .thenReturn(new PageImpl<>(List.of()));
 
-            List<ItemRequestExtendedDto> results = itemRequestService.getAll(user1.getId(), pageable);
+        List<ItemRequestExtendedDto> results = itemRequestService.getAll(user1.getId(), pageable);
 
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(itemRequestRepository, times(1))
-                    .findByRequesterId_IdNot(user1.getId(), pageable);
-        }
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(itemRequestRepository, times(1))
+                .findByRequesterId_IdNot(user1.getId(), pageable);
     }
 }

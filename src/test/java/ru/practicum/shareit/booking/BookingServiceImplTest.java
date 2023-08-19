@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -152,556 +151,541 @@ public class BookingServiceImplTest {
         assertEquals(booking.getItem().getOwner().getId(), bookingResponseDto.getItem().getOwnerId());
     }
 
-    @Nested
-    class GetById {
-        @Test
-        public void shouldGetByAuthor() {
-            when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
+    @Test
+    public void shouldGetByAuthor() {
+        when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
 
-            BookingResponseDto result = bookingService.getById(user2.getId(), booking.getId());
+        BookingResponseDto result = bookingService.getById(user2.getId(), booking.getId());
 
-            checkBookingResponseDto(booking, result);
-            verify(bookingRepository, times(1)).findById(1L);
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldGetByOwner() {
-            when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
-
-            BookingResponseDto result = bookingService.getById(user1.getId(), booking.getId());
-
-            checkBookingResponseDto(booking, result);
-            verify(bookingRepository, times(1)).findById(1L);
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldThrowExceptionIfNotOwnerOrAuthor() {
-            when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
-
-            NotFoundException exception = assertThrows(NotFoundException.class,
-                    () -> bookingService.getById(user3.getId(), booking.getId()));
-            assertEquals("Просмотр брони доступно только владельцу.", exception.getMessage());
-            verify(bookingRepository, times(1)).findById(1L);
-        }
+        checkBookingResponseDto(booking, result);
+        verify(bookingRepository, times(1)).findById(1L);
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
     }
 
-    @Nested
-    class GetAllByBookerId {
-        @Test
-        public void shouldGetAllIfBooker() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(bookingRepository.findByBookerIdOrderByStartDesc(user2.getId(), pageable))
-                    .thenReturn(new PageImpl<>(List.of(booking)));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
+    @Test
+    public void shouldGetByOwner() {
+        when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
 
-            List<BookingResponseDto> results = bookingService.getAllByBookerId(user2.getId(), State.ALL, pageable);
+        BookingResponseDto result = bookingService.getById(user1.getId(), booking.getId());
 
-            assertEquals(1, results.size());
-
-            BookingResponseDto result = results.get(0);
-
-            checkBookingResponseDto(booking, result);
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(bookingRepository, times(1))
-                    .findByBookerIdOrderByStartDesc(user2.getId(), pageable);
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldGetAllEmptyIfNotBooker() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(bookingRepository.findByBookerIdOrderByStartDesc(user1.getId(), pageable))
-                    .thenReturn(new PageImpl<>(List.of()));
-
-            List<BookingResponseDto> results = bookingService.getAllByBookerId(user1.getId(), State.ALL, pageable);
-
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(bookingRepository, times(1))
-                    .findByBookerIdOrderByStartDesc(user1.getId(), pageable);
-        }
-
-        @Test
-        public void shouldGetCurrentIfBooker() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of(booking)));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
-
-            List<BookingResponseDto> results = bookingService.getAllByBookerId(user2.getId(), State.CURRENT, pageable);
-
-            assertEquals(1, results.size());
-
-            BookingResponseDto result = results.get(0);
-
-            checkBookingResponseDto(booking, result);
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(bookingRepository, times(1))
-                    .findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any());
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldGetCurrentEmptyIfNotBooker() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of()));
-
-            List<BookingResponseDto> results = bookingService.getAllByBookerId(user1.getId(), State.CURRENT, pageable);
-
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(bookingRepository, times(1))
-                    .findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any());
-        }
-
-        @Test
-        public void shouldGetPastIfBooker() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(bookingRepository.findByBookerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of(booking)));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
-
-            List<BookingResponseDto> results = bookingService.getAllByBookerId(user2.getId(), State.PAST, pageable);
-
-            assertEquals(1, results.size());
-
-            BookingResponseDto result = results.get(0);
-
-            checkBookingResponseDto(booking, result);
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(bookingRepository, times(1))
-                    .findByBookerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any());
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldGetPastEmptyIfNotBooker() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(bookingRepository.findByBookerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of()));
-
-            List<BookingResponseDto> results = bookingService.getAllByBookerId(user1.getId(), State.PAST, pageable);
-
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(bookingRepository, times(1))
-                    .findByBookerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any());
-        }
-
-        @Test
-        public void shouldGetFutureIfBooker() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of(booking)));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
-
-            List<BookingResponseDto> results = bookingService.getAllByBookerId(user2.getId(), State.FUTURE, pageable);
-
-            assertEquals(1, results.size());
-
-            BookingResponseDto result = results.get(0);
-
-            checkBookingResponseDto(booking, result);
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(bookingRepository, times(1))
-                    .findByBookerIdAndStartAfterOrderByStartDesc(any(), any(), any());
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldGetFutureEmptyIfNotBooker() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of()));
-
-            List<BookingResponseDto> results = bookingService.getAllByBookerId(user1.getId(), State.FUTURE, pageable);
-
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(bookingRepository, times(1))
-                    .findByBookerIdAndStartAfterOrderByStartDesc(any(), any(), any());
-        }
-
-        @Test
-        public void shouldGetWaitingIfBooker() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of(booking)));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
-
-            List<BookingResponseDto> results = bookingService.getAllByBookerId(user2.getId(), State.WAITING, pageable);
-
-            assertEquals(1, results.size());
-
-            BookingResponseDto result = results.get(0);
-
-            checkBookingResponseDto(booking, result);
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(bookingRepository, times(1))
-                    .findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldGetWaitingEmptyIfNotBooker() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of()));
-
-            List<BookingResponseDto> results = bookingService.getAllByBookerId(user1.getId(), State.WAITING, pageable);
-
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(bookingRepository, times(1))
-                    .findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
-        }
-
-        @Test
-        public void shouldGetRejectedIfBooker() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of(booking)));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
-
-            List<BookingResponseDto> results = bookingService.getAllByBookerId(user2.getId(), State.REJECTED, pageable);
-
-            assertEquals(1, results.size());
-
-            BookingResponseDto result = results.get(0);
-
-            checkBookingResponseDto(booking, result);
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(bookingRepository, times(1))
-                    .findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldGetRejectedEmptyIfNotBooker() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of()));
-
-            List<BookingResponseDto> results = bookingService.getAllByBookerId(user1.getId(), State.REJECTED, pageable);
-
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(bookingRepository, times(1))
-                    .findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
-        }
+        checkBookingResponseDto(booking, result);
+        verify(bookingRepository, times(1)).findById(1L);
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
     }
 
-    @Nested
-    class GetAllByOwnerId {
-        @Test
-        public void shouldGetAllIfOwner() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(bookingRepository.findByItemOwnerIdOrderByStartDesc(user1.getId(), pageable))
-                    .thenReturn(new PageImpl<>(List.of(booking)));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
+    @Test
+    public void shouldThrowExceptionIfNotOwnerOrAuthor() {
+        when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
 
-            List<BookingResponseDto> results = bookingService.getAllByOwnerId(user1.getId(), State.ALL, pageable);
-
-            assertEquals(1, results.size());
-
-            BookingResponseDto result = results.get(0);
-
-            checkBookingResponseDto(booking, result);
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(bookingRepository, times(1))
-                    .findByItemOwnerIdOrderByStartDesc(user1.getId(), pageable);
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldGetAllEmptyIfNotBooker() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(bookingRepository.findByItemOwnerIdOrderByStartDesc(user2.getId(), pageable))
-                    .thenReturn(new PageImpl<>(List.of()));
-
-            List<BookingResponseDto> results = bookingService.getAllByOwnerId(user2.getId(), State.ALL, pageable);
-
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(bookingRepository, times(1))
-                    .findByItemOwnerIdOrderByStartDesc(user2.getId(), pageable);
-        }
-
-        @Test
-        public void shouldGetCurrentIfOwner() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of(booking)));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
-
-            List<BookingResponseDto> results = bookingService.getAllByOwnerId(user1.getId(), State.CURRENT, pageable);
-
-            assertEquals(1, results.size());
-
-            BookingResponseDto result = results.get(0);
-
-            checkBookingResponseDto(booking, result);
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(bookingRepository, times(1))
-                    .findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any());
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldGetCurrentEmptyIfNotBooker() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of()));
-
-            List<BookingResponseDto> results = bookingService.getAllByOwnerId(user2.getId(), State.CURRENT, pageable);
-
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(bookingRepository, times(1))
-                    .findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any());
-        }
-
-        @Test
-        public void shouldGetPastIfOwner() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(bookingRepository.findByItemOwnerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of(booking)));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
-
-            List<BookingResponseDto> results = bookingService.getAllByOwnerId(user1.getId(), State.PAST, pageable);
-
-            assertEquals(1, results.size());
-
-            BookingResponseDto result = results.get(0);
-
-            checkBookingResponseDto(booking, result);
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(bookingRepository, times(1))
-                    .findByItemOwnerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any());
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldGetPastEmptyIfNotBooker() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(bookingRepository.findByItemOwnerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of()));
-
-            List<BookingResponseDto> results = bookingService.getAllByOwnerId(user2.getId(), State.PAST, pageable);
-
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(bookingRepository, times(1))
-                    .findByItemOwnerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any());
-        }
-
-        @Test
-        public void shouldGetFutureIfOwner() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of(booking)));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
-
-            List<BookingResponseDto> results = bookingService.getAllByOwnerId(user1.getId(), State.FUTURE, pageable);
-
-            assertEquals(1, results.size());
-
-            BookingResponseDto result = results.get(0);
-
-            checkBookingResponseDto(booking, result);
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(bookingRepository, times(1))
-                    .findByItemOwnerIdAndStartAfterOrderByStartDesc(any(), any(), any());
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldGetFutureEmptyIfNotBooker() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of()));
-
-            List<BookingResponseDto> results = bookingService.getAllByOwnerId(user2.getId(), State.FUTURE, pageable);
-
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(bookingRepository, times(1))
-                    .findByItemOwnerIdAndStartAfterOrderByStartDesc(any(), any(), any());
-        }
-
-        @Test
-        public void shouldGetWaitingIfOwner() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of(booking)));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
-
-            List<BookingResponseDto> results = bookingService.getAllByOwnerId(user1.getId(), State.WAITING, pageable);
-
-            assertEquals(1, results.size());
-
-            BookingResponseDto result = results.get(0);
-
-            checkBookingResponseDto(booking, result);
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(bookingRepository, times(1))
-                    .findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldGetWaitingEmptyIfNotBooker() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of()));
-
-            List<BookingResponseDto> results = bookingService.getAllByOwnerId(user2.getId(), State.WAITING, pageable);
-
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(bookingRepository, times(1))
-                    .findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
-        }
-
-        @Test
-        public void shouldGetRejectedIfOwner() {
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-            when(bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of(booking)));
-            when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
-
-            List<BookingResponseDto> results = bookingService.getAllByOwnerId(user1.getId(), State.REJECTED, pageable);
-
-            assertEquals(1, results.size());
-
-            BookingResponseDto result = results.get(0);
-
-            checkBookingResponseDto(booking, result);
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(bookingRepository, times(1))
-                    .findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
-            verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
-        }
-
-        @Test
-        public void shouldGetRejectedEmptyIfNotBooker() {
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
-                    .thenReturn(new PageImpl<>(List.of()));
-
-            List<BookingResponseDto> results = bookingService.getAllByOwnerId(user2.getId(), State.REJECTED, pageable);
-
-            assertTrue(results.isEmpty());
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(bookingRepository, times(1))
-                    .findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
-        }
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> bookingService.getById(user3.getId(), booking.getId()));
+        assertEquals("Просмотр брони доступно только владельцу.", exception.getMessage());
+        verify(bookingRepository, times(1)).findById(1L);
     }
 
-    @Nested
-    class Create {
-        @Test
-        public void shouldCreate() {
-            when(itemService.getItemById(bookingRequestDto.getItemId())).thenReturn(item1);
-            when(userService.getUserById(user2.getId())).thenReturn(user2);
-            when(bookingMapper.requestDtoToBooking(bookingRequestDto, item1, user2, Status.WAITING))
-                    .thenReturn(booking);
+    @Test
+    public void shouldGetAllIfBooker() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(bookingRepository.findByBookerIdOrderByStartDesc(user2.getId(), pageable))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
 
-            bookingService.add(user2.getId(), bookingRequestDto);
+        List<BookingResponseDto> results = bookingService.getAllByBookerId(user2.getId(), State.ALL, pageable);
 
-            verify(itemService, times(1)).getItemById(bookingRequestDto.getItemId());
-            verify(userService, times(1)).getUserById(user2.getId());
-            verify(bookingMapper, times(1))
-                    .requestDtoToBooking(bookingRequestDto, item1, user2, Status.WAITING);
-            verify(bookingRepository, times(1)).save(bookingArgumentCaptor.capture());
+        assertEquals(1, results.size());
 
-            Booking savedBooking = bookingArgumentCaptor.getValue();
+        BookingResponseDto result = results.get(0);
 
-            assertEquals(booking, savedBooking);
-            assertEquals(booking.getId(), savedBooking.getId());
-            assertEquals(booking.getStatus(), savedBooking.getStatus());
-            assertEquals(booking.getStart(), savedBooking.getStart());
-            assertEquals(booking.getEnd(), savedBooking.getEnd());
-            assertEquals(booking.getBooker().getId(), savedBooking.getBooker().getId());
-        }
-
-        @Test
-        public void shouldThrowExceptionIfEndIsBeforeStart() {
-            BookingException exception = assertThrows(BookingException.class,
-                    () -> bookingService.add(user2.getId(), bookingRequestDtoWrongDate));
-            assertEquals("Недопустимая бронь.", exception.getMessage());
-            verify(bookingRepository, never()).save(any());
-        }
-
-        @Test
-        public void shouldThrowExceptionIfItemIsNotAvailable() {
-            when(itemService.getItemById(bookingRequestDto.getItemId())).thenReturn(itemIsNoAvailable);
-
-            BookingException exception = assertThrows(BookingException.class,
-                    () -> bookingService.add(user2.getId(), bookingRequestDto));
-            assertEquals("Предмет недоступен для брони.", exception.getMessage());
-            verify(itemService, times(1)).getItemById(bookingRequestDto.getItemId());
-            verify(bookingRepository, never()).save(any());
-        }
-
-        @Test
-        public void shouldThrowExceptionIfBookingByOwner() {
-            when(itemService.getItemById(bookingRequestDto.getItemId())).thenReturn(item1);
-            when(userService.getUserById(user1.getId())).thenReturn(user1);
-
-            NotFoundException exception = assertThrows(NotFoundException.class,
-                    () -> bookingService.add(user1.getId(), bookingRequestDto));
-            assertEquals("Владелец не может бронировать.", exception.getMessage());
-            verify(itemService, times(1)).getItemById(bookingRequestDto.getItemId());
-            verify(userService, times(1)).getUserById(user1.getId());
-            verify(bookingRepository, never()).save(any());
-        }
+        checkBookingResponseDto(booking, result);
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdOrderByStartDesc(user2.getId(), pageable);
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
     }
 
-    @Nested
-    class Update {
-        @Test
-        public void shouldApprove() {
-            when(bookingRepository.findById(bookingIsWaiting1.getId())).thenReturn(Optional.of(bookingIsWaiting1));
+    @Test
+    public void shouldGetAllEmptyIfNotBooker() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(bookingRepository.findByBookerIdOrderByStartDesc(user1.getId(), pageable))
+                .thenReturn(new PageImpl<>(List.of()));
 
-            bookingService.update(user1.getId(), bookingIsWaiting1.getId(), true);
+        List<BookingResponseDto> results = bookingService.getAllByBookerId(user1.getId(), State.ALL, pageable);
 
-            verify(bookingRepository, times(1)).findById(bookingIsWaiting1.getId());
-            verify(bookingRepository, times(1)).save(bookingArgumentCaptor.capture());
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdOrderByStartDesc(user1.getId(), pageable);
+    }
 
-            Booking savedBooking = bookingArgumentCaptor.getValue();
+    @Test
+    public void shouldGetCurrentIfBooker() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
 
-            assertEquals(Status.APPROVED, savedBooking.getStatus());
-        }
+        List<BookingResponseDto> results = bookingService.getAllByBookerId(user2.getId(), State.CURRENT, pageable);
 
-        @Test
-        public void shouldReject() {
-            when(bookingRepository.findById(bookingIsWaiting1.getId())).thenReturn(Optional.of(bookingIsWaiting1));
+        assertEquals(1, results.size());
 
-            bookingService.update(user1.getId(), bookingIsWaiting1.getId(), false);
+        BookingResponseDto result = results.get(0);
 
-            verify(bookingRepository, times(1)).findById(bookingIsWaiting1.getId());
-            verify(bookingRepository, times(1)).save(bookingArgumentCaptor.capture());
+        checkBookingResponseDto(booking, result);
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any());
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
+    }
 
-            Booking savedBooking = bookingArgumentCaptor.getValue();
+    @Test
+    public void shouldGetCurrentEmptyIfNotBooker() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
 
-            assertEquals(Status.REJECTED, savedBooking.getStatus());
-        }
+        List<BookingResponseDto> results = bookingService.getAllByBookerId(user1.getId(), State.CURRENT, pageable);
 
-        @Test
-        public void shouldThrowExceptionIfAlreadyUpdateBefore() {
-            when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any());
+    }
 
-            BookingException exception = assertThrows(BookingException.class,
-                    () -> bookingService.update(user1.getId(), booking.getId(), false));
-            assertEquals("Ответ по бронированию уже дан.", exception.getMessage());
-            verify(bookingRepository, times(1)).findById(booking.getId());
-            verify(bookingRepository, never()).save(any());
-        }
+    @Test
+    public void shouldGetPastIfBooker() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(bookingRepository.findByBookerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
+
+        List<BookingResponseDto> results = bookingService.getAllByBookerId(user2.getId(), State.PAST, pageable);
+
+        assertEquals(1, results.size());
+
+        BookingResponseDto result = results.get(0);
+
+        checkBookingResponseDto(booking, result);
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any());
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
+    }
+
+    @Test
+    public void shouldGetPastEmptyIfNotBooker() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(bookingRepository.findByBookerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        List<BookingResponseDto> results = bookingService.getAllByBookerId(user1.getId(), State.PAST, pageable);
+
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any());
+    }
+
+    @Test
+    public void shouldGetFutureIfBooker() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
+
+        List<BookingResponseDto> results = bookingService.getAllByBookerId(user2.getId(), State.FUTURE, pageable);
+
+        assertEquals(1, results.size());
+
+        BookingResponseDto result = results.get(0);
+
+        checkBookingResponseDto(booking, result);
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStartAfterOrderByStartDesc(any(), any(), any());
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
+    }
+
+    @Test
+    public void shouldGetFutureEmptyIfNotBooker() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        List<BookingResponseDto> results = bookingService.getAllByBookerId(user1.getId(), State.FUTURE, pageable);
+
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStartAfterOrderByStartDesc(any(), any(), any());
+    }
+
+    @Test
+    public void shouldGetWaitingIfBooker() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
+
+        List<BookingResponseDto> results = bookingService.getAllByBookerId(user2.getId(), State.WAITING, pageable);
+
+        assertEquals(1, results.size());
+
+        BookingResponseDto result = results.get(0);
+
+        checkBookingResponseDto(booking, result);
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
+    }
+
+    @Test
+    public void shouldGetWaitingEmptyIfNotBooker() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        List<BookingResponseDto> results = bookingService.getAllByBookerId(user1.getId(), State.WAITING, pageable);
+
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
+    }
+
+    @Test
+    public void shouldGetRejectedIfBooker() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
+
+        List<BookingResponseDto> results = bookingService.getAllByBookerId(user2.getId(), State.REJECTED, pageable);
+
+        assertEquals(1, results.size());
+
+        BookingResponseDto result = results.get(0);
+
+        checkBookingResponseDto(booking, result);
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
+    }
+
+    @Test
+    public void shouldGetRejectedEmptyIfNotBooker() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        List<BookingResponseDto> results = bookingService.getAllByBookerId(user1.getId(), State.REJECTED, pageable);
+
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
+    }
+
+    @Test
+    public void shouldGetAllIfOwner() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(bookingRepository.findByItemOwnerIdOrderByStartDesc(user1.getId(), pageable))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
+
+        List<BookingResponseDto> results = bookingService.getAllByOwnerId(user1.getId(), State.ALL, pageable);
+
+        assertEquals(1, results.size());
+
+        BookingResponseDto result = results.get(0);
+
+        checkBookingResponseDto(booking, result);
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdOrderByStartDesc(user1.getId(), pageable);
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
+    }
+
+    @Test
+    public void shouldGetAllIfNotBooker() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(bookingRepository.findByItemOwnerIdOrderByStartDesc(user2.getId(), pageable))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        List<BookingResponseDto> results = bookingService.getAllByOwnerId(user2.getId(), State.ALL, pageable);
+
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdOrderByStartDesc(user2.getId(), pageable);
+    }
+
+    @Test
+    public void shouldGetCurrentIfOwner() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
+
+        List<BookingResponseDto> results = bookingService.getAllByOwnerId(user1.getId(), State.CURRENT, pageable);
+
+        assertEquals(1, results.size());
+
+        BookingResponseDto result = results.get(0);
+
+        checkBookingResponseDto(booking, result);
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any());
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
+    }
+
+    @Test
+    public void shouldGetCurrentIfNotBooker() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        List<BookingResponseDto> results = bookingService.getAllByOwnerId(user2.getId(), State.CURRENT, pageable);
+
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any());
+    }
+
+    @Test
+    public void shouldGetPastIfOwner() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(bookingRepository.findByItemOwnerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
+
+        List<BookingResponseDto> results = bookingService.getAllByOwnerId(user1.getId(), State.PAST, pageable);
+
+        assertEquals(1, results.size());
+
+        BookingResponseDto result = results.get(0);
+
+        checkBookingResponseDto(booking, result);
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any());
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
+    }
+
+    @Test
+    public void shouldGetPastIfNotBooker() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(bookingRepository.findByItemOwnerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        List<BookingResponseDto> results = bookingService.getAllByOwnerId(user2.getId(), State.PAST, pageable);
+
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndEndBeforeAndStatusEqualsOrderByStartDesc(any(), any(), any(), any());
+    }
+
+    @Test
+    public void shouldGetFutureIfOwner() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
+
+        List<BookingResponseDto> results = bookingService.getAllByOwnerId(user1.getId(), State.FUTURE, pageable);
+
+        assertEquals(1, results.size());
+
+        BookingResponseDto result = results.get(0);
+
+        checkBookingResponseDto(booking, result);
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndStartAfterOrderByStartDesc(any(), any(), any());
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
+    }
+
+    @Test
+    public void shouldGetFutureIfNotBooker() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        List<BookingResponseDto> results = bookingService.getAllByOwnerId(user2.getId(), State.FUTURE, pageable);
+
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndStartAfterOrderByStartDesc(any(), any(), any());
+    }
+
+    @Test
+    public void shouldGetWaitingIfOwner() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
+
+        List<BookingResponseDto> results = bookingService.getAllByOwnerId(user1.getId(), State.WAITING, pageable);
+
+        assertEquals(1, results.size());
+
+        BookingResponseDto result = results.get(0);
+
+        checkBookingResponseDto(booking, result);
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
+    }
+
+    @Test
+    public void shouldGetWaitingIfNotBooker() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        List<BookingResponseDto> results = bookingService.getAllByOwnerId(user2.getId(), State.WAITING, pageable);
+
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
+    }
+
+    @Test
+    public void shouldGetRejectedIfOwner() {
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+        when(bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        when(bookingMapper.bookingToBookingResponseDto(booking)).thenReturn(bookingResponseDto);
+
+        List<BookingResponseDto> results = bookingService.getAllByOwnerId(user1.getId(), State.REJECTED, pageable);
+
+        assertEquals(1, results.size());
+
+        BookingResponseDto result = results.get(0);
+
+        checkBookingResponseDto(booking, result);
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
+        verify(bookingMapper, times(1)).bookingToBookingResponseDto(booking);
+    }
+
+    @Test
+    public void shouldGetRejectedEmptyIfNotBookerWhenAdd() {
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        List<BookingResponseDto> results = bookingService.getAllByOwnerId(user2.getId(), State.REJECTED, pageable);
+
+        assertTrue(results.isEmpty());
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(bookingRepository, times(1))
+                .findByItemOwnerIdAndStatusEqualsOrderByStartDesc(any(), any(), any());
+    }
+
+    @Test
+    public void shouldCreate() {
+        when(itemService.getItemById(bookingRequestDto.getItemId())).thenReturn(item1);
+        when(userService.getUserById(user2.getId())).thenReturn(user2);
+        when(bookingMapper.requestDtoToBooking(bookingRequestDto, item1, user2, Status.WAITING))
+                .thenReturn(booking);
+
+        bookingService.add(user2.getId(), bookingRequestDto);
+
+        verify(itemService, times(1)).getItemById(bookingRequestDto.getItemId());
+        verify(userService, times(1)).getUserById(user2.getId());
+        verify(bookingMapper, times(1))
+                .requestDtoToBooking(bookingRequestDto, item1, user2, Status.WAITING);
+        verify(bookingRepository, times(1)).save(bookingArgumentCaptor.capture());
+
+        Booking savedBooking = bookingArgumentCaptor.getValue();
+
+        assertEquals(booking, savedBooking);
+        assertEquals(booking.getId(), savedBooking.getId());
+        assertEquals(booking.getStatus(), savedBooking.getStatus());
+        assertEquals(booking.getStart(), savedBooking.getStart());
+        assertEquals(booking.getEnd(), savedBooking.getEnd());
+        assertEquals(booking.getBooker().getId(), savedBooking.getBooker().getId());
+    }
+
+    @Test
+    public void shouldThrowExceptionIfEndIsBeforeStartWhenAdd() {
+        BookingException exception = assertThrows(BookingException.class,
+                () -> bookingService.add(user2.getId(), bookingRequestDtoWrongDate));
+        assertEquals("Недопустимая бронь.", exception.getMessage());
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    public void shouldThrowExceptionIfItemIsNotAvailableWhenAdd() {
+        when(itemService.getItemById(bookingRequestDto.getItemId())).thenReturn(itemIsNoAvailable);
+
+        BookingException exception = assertThrows(BookingException.class,
+                () -> bookingService.add(user2.getId(), bookingRequestDto));
+        assertEquals("Предмет недоступен для брони.", exception.getMessage());
+        verify(itemService, times(1)).getItemById(bookingRequestDto.getItemId());
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    public void shouldThrowExceptionIfBookingByOwnerWhenAdd() {
+        when(itemService.getItemById(bookingRequestDto.getItemId())).thenReturn(item1);
+        when(userService.getUserById(user1.getId())).thenReturn(user1);
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> bookingService.add(user1.getId(), bookingRequestDto));
+        assertEquals("Владелец не может бронировать.", exception.getMessage());
+        verify(itemService, times(1)).getItemById(bookingRequestDto.getItemId());
+        verify(userService, times(1)).getUserById(user1.getId());
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    public void shouldApproveWhenUpdate() {
+        when(bookingRepository.findById(bookingIsWaiting1.getId())).thenReturn(Optional.of(bookingIsWaiting1));
+
+        bookingService.update(user1.getId(), bookingIsWaiting1.getId(), true);
+
+        verify(bookingRepository, times(1)).findById(bookingIsWaiting1.getId());
+        verify(bookingRepository, times(1)).save(bookingArgumentCaptor.capture());
+
+        Booking savedBooking = bookingArgumentCaptor.getValue();
+
+        assertEquals(Status.APPROVED, savedBooking.getStatus());
+    }
+
+    @Test
+    public void shouldRejectWhenUpdate() {
+        when(bookingRepository.findById(bookingIsWaiting1.getId())).thenReturn(Optional.of(bookingIsWaiting1));
+
+        bookingService.update(user1.getId(), bookingIsWaiting1.getId(), false);
+
+        verify(bookingRepository, times(1)).findById(bookingIsWaiting1.getId());
+        verify(bookingRepository, times(1)).save(bookingArgumentCaptor.capture());
+
+        Booking savedBooking = bookingArgumentCaptor.getValue();
+
+        assertEquals(Status.REJECTED, savedBooking.getStatus());
+    }
+
+    @Test
+    public void shouldThrowExceptionIfAlreadyUpdateBefore() {
+        when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
+
+        BookingException exception = assertThrows(BookingException.class,
+                () -> bookingService.update(user1.getId(), booking.getId(), false));
+        assertEquals("Ответ по бронированию уже дан.", exception.getMessage());
+        verify(bookingRepository, times(1)).findById(booking.getId());
+        verify(bookingRepository, never()).save(any());
     }
 }

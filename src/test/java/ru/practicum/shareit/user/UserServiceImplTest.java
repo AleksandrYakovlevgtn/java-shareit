@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -61,151 +60,133 @@ class UserServiceImplTest {
         assertEquals(user.getEmail(), userDtoFromService.getEmail());
     }
 
-    @Nested
-    class GetAll {
-        @Test
-        public void shouldGet() {
-            when(userRepository.findAll()).thenReturn(List.of(user1, user2));
-            when(userMapper.toUserDto(any())).thenCallRealMethod();
+    @Test
+    public void shouldGet() {
+        when(userRepository.findAll()).thenReturn(List.of(user1, user2));
+        when(userMapper.toUserDto(any())).thenCallRealMethod();
 
-            List<UserDto> usersFromService = userService.getAll();
+        List<UserDto> usersFromService = userService.getAll();
 
-            assertEquals(2, usersFromService.size());
+        assertEquals(2, usersFromService.size());
 
-            UserDto userFromService1 = usersFromService.get(0);
-            UserDto userFromService2 = usersFromService.get(1);
+        UserDto userFromService1 = usersFromService.get(0);
+        UserDto userFromService2 = usersFromService.get(1);
 
-            checkUserDto(user1, userFromService1);
-            checkUserDto(user2, userFromService2);
-            verify(userMapper, times(2)).toUserDto(any());
-            verify(userRepository, times(1)).findAll();
-        }
-
-        @Test
-        public void shouldGetIfEmpty() {
-            when(userRepository.findAll()).thenReturn(new ArrayList<>());
-
-            List<UserDto> usersFromService = userService.getAll();
-
-            assertTrue(usersFromService.isEmpty());
-            verify(userRepository, times(1)).findAll();
-        }
+        checkUserDto(user1, userFromService1);
+        checkUserDto(user2, userFromService2);
+        verify(userMapper, times(2)).toUserDto(any());
+        verify(userRepository, times(1)).findAll();
     }
 
-    @Nested
-    class GetById {
-        @Test
-        public void shouldGet() {
-            when(userRepository.findById(1L)).thenReturn(Optional.of(user1));
-            when(userMapper.toUserDto(any())).thenCallRealMethod();
+    @Test
+    public void shouldGetIfEmpty() {
+        when(userRepository.findAll()).thenReturn(new ArrayList<>());
 
-            UserDto userFromService = userService.getById(1L);
+        List<UserDto> usersFromService = userService.getAll();
 
-            checkUserDto(user1, userFromService);
-            verify(userRepository, times(1)).findById(1L);
-            verify(userMapper, times(1)).toUserDto(any());
-        }
-
-        @Test
-        public void shouldThrowExceptionIfUserIdNotFound() {
-            when(userRepository.findById(999L)).thenReturn(Optional.empty());
-
-            NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.getById(999L));
-            assertEquals("Пользователя не существует.", exception.getMessage());
-            verify(userRepository, times(1)).findById(any());
-        }
+        assertTrue(usersFromService.isEmpty());
+        verify(userRepository, times(1)).findAll();
     }
 
-    @Nested
-    class Add {
-        @Test
-        public void shouldAdd() {
-            when(userMapper.toUserDto(any())).thenCallRealMethod();
-            when(userMapper.toUser(any())).thenCallRealMethod();
+    @Test
+    public void shouldGetFromService() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user1));
+        when(userMapper.toUserDto(any())).thenCallRealMethod();
 
-            userService.add(userMapper.toUserDto(user1));
+        UserDto userFromService = userService.getById(1L);
 
-            verify(userRepository, times(1)).save(user1);
-        }
+        checkUserDto(user1, userFromService);
+        verify(userRepository, times(1)).findById(1L);
+        verify(userMapper, times(1)).toUserDto(any());
     }
 
-    @Nested
-    class Update {
-        @Test
-        public void shouldUpdate() {
-            when(userRepository.findById(1L)).thenReturn(Optional.of(user1));
+    @Test
+    public void shouldThrowExceptionIfUserIdNotFoundWhenSearch() {
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-            userService.update(user1.getId(), updateUserDto);
-
-            verify(userRepository, times(1)).save(userArgumentCaptor.capture());
-
-            User savedUser = userArgumentCaptor.getValue();
-
-            assertEquals(user1.getId(), savedUser.getId());
-            assertEquals(updateUserDto.getName(), savedUser.getName());
-            assertEquals(updateUserDto.getEmail(), savedUser.getEmail());
-        }
-
-        @Test
-        public void shouldThrowExceptionIfUserNotFound() {
-            when(userRepository.findById(999L)).thenReturn(Optional.empty());
-
-            NotFoundException exception = assertThrows(NotFoundException.class,
-                    () -> userService.update(999L, updateUserDto));
-            assertEquals("Пользователя не существует.", exception.getMessage());
-            verify(userRepository, times(1)).findById(any());
-            verify(userRepository, never()).save(any());
-        }
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.getById(999L));
+        assertEquals("Пользователя не существует.", exception.getMessage());
+        verify(userRepository, times(1)).findById(any());
     }
 
-    @Nested
-    class Delete {
-        @Test
-        public void shouldDelete() {
-            when(userRepository.findById(1L)).thenReturn(Optional.empty());
+    @Test
+    public void shouldAdd() {
+        when(userMapper.toUserDto(any())).thenCallRealMethod();
+        when(userMapper.toUser(any())).thenCallRealMethod();
 
-            userService.delete(user1.getId());
+        userService.add(userMapper.toUserDto(user1));
 
-            NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.getById(1L));
-            assertEquals("Пользователя не существует.", exception.getMessage());
-            verify(userRepository, times(1)).deleteById(1L);
-            verify(userRepository, times(1)).findById(1L);
-        }
-
-        @Test
-        public void shouldDeleteIfUserIdNotFound() {
-            when(userRepository.findById(999L)).thenReturn(Optional.empty());
-
-            userService.delete(999L);
-
-            NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.getById(999L));
-            assertEquals("Пользователя не существует.", exception.getMessage());
-            verify(userRepository, times(1)).deleteById(999L);
-            verify(userRepository, times(1)).findById(999L);
-        }
+        verify(userRepository, times(1)).save(user1);
     }
 
-    @Nested
-    class GetUserById {
-        @Test
-        public void shouldGet() {
-            when(userRepository.findById(1L)).thenReturn(Optional.of(user1));
+    @Test
+    public void shouldUpdate() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user1));
 
-            User userFromService = userService.getUserById(1L);
+        userService.update(user1.getId(), updateUserDto);
 
-            assertEquals(user1.getId(), userFromService.getId());
-            assertEquals(user1.getName(), userFromService.getName());
-            assertEquals(user1.getEmail(), userFromService.getEmail());
-            verify(userRepository, times(1)).findById(1L);
-        }
+        verify(userRepository, times(1)).save(userArgumentCaptor.capture());
 
-        @Test
-        public void shouldThrowExceptionIfUserIdNotFound() {
-            when(userRepository.findById(999L)).thenReturn(Optional.empty());
+        User savedUser = userArgumentCaptor.getValue();
 
-            NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.getById(999L));
-            assertEquals("Пользователя не существует.", exception.getMessage());
-            verify(userRepository, times(1)).findById(any());
-        }
+        assertEquals(user1.getId(), savedUser.getId());
+        assertEquals(updateUserDto.getName(), savedUser.getName());
+        assertEquals(updateUserDto.getEmail(), savedUser.getEmail());
+    }
+
+    @Test
+    public void shouldThrowExceptionIfUserNotFound() {
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> userService.update(999L, updateUserDto));
+        assertEquals("Пользователя не существует.", exception.getMessage());
+        verify(userRepository, times(1)).findById(any());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    public void shouldDelete() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        userService.delete(user1.getId());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.getById(1L));
+        assertEquals("Пользователя не существует.", exception.getMessage());
+        verify(userRepository, times(1)).deleteById(1L);
+        verify(userRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    public void shouldDeleteIfUserIdNotFound() {
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        userService.delete(999L);
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.getById(999L));
+        assertEquals("Пользователя не существует.", exception.getMessage());
+        verify(userRepository, times(1)).deleteById(999L);
+        verify(userRepository, times(1)).findById(999L);
+    }
+
+    @Test
+    public void shouldGetUser() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user1));
+
+        User userFromService = userService.getUserById(1L);
+
+        assertEquals(user1.getId(), userFromService.getId());
+        assertEquals(user1.getName(), userFromService.getName());
+        assertEquals(user1.getEmail(), userFromService.getEmail());
+        verify(userRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfUserIdNotFound() {
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.getById(999L));
+        assertEquals("Пользователя не существует.", exception.getMessage());
+        verify(userRepository, times(1)).findById(any());
     }
 }

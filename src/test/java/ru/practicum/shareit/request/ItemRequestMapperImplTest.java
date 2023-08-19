@@ -1,6 +1,5 @@
 package ru.practicum.shareit.request;
 
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,64 +45,55 @@ public class ItemRequestMapperImplTest {
     @InjectMocks
     private ItemRequestMapperImpl itemRequestMapper;
 
-    @Nested
-    class ToItemRequest {
-        @Test
-        public void shouldReturnItemRequest() {
-            ItemRequest result = itemRequestMapper.toItemRequest(itemRequestCreateDto, user, dateTime);
+    @Test
+    public void shouldReturnItemRequest() {
+        ItemRequest result = itemRequestMapper.toItemRequest(itemRequestCreateDto, user, dateTime);
 
-            assertNull(result.getId());
-            assertEquals(itemRequestCreateDto.getDescription(), result.getDescription());
-            assertEquals(user.getId(), result.getRequesterId().getId());
-            assertEquals(user.getName(), result.getRequesterId().getName());
-            assertEquals(user.getEmail(), result.getRequesterId().getEmail());
-            assertEquals(dateTime, result.getCreated());
-        }
-
-        @Test
-        public void shouldReturnNull() {
-            ItemRequest result = itemRequestMapper.toItemRequest(null, null, null);
-
-            assertNull(result);
-        }
+        assertNull(result.getId());
+        assertEquals(itemRequestCreateDto.getDescription(), result.getDescription());
+        assertEquals(user.getId(), result.getRequesterId().getId());
+        assertEquals(user.getName(), result.getRequesterId().getName());
+        assertEquals(user.getEmail(), result.getRequesterId().getEmail());
+        assertEquals(dateTime, result.getCreated());
     }
 
-    @Nested
-    class ToItemRequestDto {
-        @Test
-        public void shouldReturnItemRequestDto() {
-            ItemRequestDto result = itemRequestMapper.toItemRequestDto(itemRequest);
+    @Test
+    public void shouldReturnNull() {
+        ItemRequest result = itemRequestMapper.toItemRequest(null, null, null);
 
-            assertEquals(itemRequest.getId(), result.getId());
-            assertEquals(itemRequest.getDescription(), result.getDescription());
-            assertEquals(itemRequest.getCreated(), result.getCreated());
-        }
-
-        @Test
-        public void shouldReturnNull() {
-            ItemRequestDto result = itemRequestMapper.toItemRequestDto(null);
-
-            assertNull(result);
-        }
+        assertNull(result);
     }
 
-    @Nested
-    class ToItemRequestExtendedDto {
-        @Test
-        public void shouldReturnItemRequestExtendedDto() {
-            ItemRequestExtendedDto result = itemRequestMapper.toItemRequestExtendedDto(itemRequest, itemsDto);
+    @Test
+    public void shouldReturnItemRequestDto() {
+        ItemRequestDto result = itemRequestMapper.toItemRequestDto(itemRequest);
 
-            assertEquals(itemRequest.getId(), result.getId());
-            assertEquals(itemRequest.getDescription(), result.getDescription());
-            assertEquals(itemRequest.getCreated(), result.getCreated());
-            assertEquals(itemsDto, result.getItems());
-        }
+        assertEquals(itemRequest.getId(), result.getId());
+        assertEquals(itemRequest.getDescription(), result.getDescription());
+        assertEquals(itemRequest.getCreated(), result.getCreated());
+    }
 
-        @Test
-        public void shouldReturnNull() {
-            ItemRequestExtendedDto result = itemRequestMapper.toItemRequestExtendedDto(null, null);
+    @Test
+    public void shouldReturnNullFromMapperWhenItemRequestDtoNull() {
+        ItemRequestDto result = itemRequestMapper.toItemRequestDto(null);
 
-            assertNull(result);
-        }
+        assertNull(result);
+    }
+
+    @Test
+    public void shouldReturnItemRequestExtendedDto() {
+        ItemRequestExtendedDto result = itemRequestMapper.toItemRequestExtendedDto(itemRequest, itemsDto);
+
+        assertEquals(itemRequest.getId(), result.getId());
+        assertEquals(itemRequest.getDescription(), result.getDescription());
+        assertEquals(itemRequest.getCreated(), result.getCreated());
+        assertEquals(itemsDto, result.getItems());
+    }
+
+    @Test
+    public void shouldReturnNullFromMapper() {
+        ItemRequestExtendedDto result = itemRequestMapper.toItemRequestExtendedDto(null, null);
+
+        assertNull(result);
     }
 }
