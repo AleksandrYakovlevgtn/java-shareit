@@ -7,6 +7,7 @@ import ru.practicum.shareit.markers.Update;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Getter
 @Setter
@@ -16,6 +17,7 @@ import javax.validation.constraints.NotBlank;
 public class UserDto {
     Long id;
     String name;
+    @Size(max = 100)
     @NotBlank(groups = Create.class)
     @Email(groups = {Create.class, Update.class})
     String email;
