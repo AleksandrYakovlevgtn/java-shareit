@@ -7,9 +7,8 @@ import ru.practicum.shareit.markers.Update;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-
-@Getter
 @Setter
+@Getter
 @Builder
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
