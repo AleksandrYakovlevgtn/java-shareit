@@ -23,10 +23,10 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "name",nullable = false)
+    @Column(name = "name", nullable = false)
     String name;
 
-    @Column(name = "description",nullable = false)
+    @Column(name = "description", nullable = false)
     String description;
 
     @Column(name = "available", nullable = false)
@@ -39,6 +39,7 @@ public class Item {
 
     @Column(name = "request_id")
     Long requestId;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
