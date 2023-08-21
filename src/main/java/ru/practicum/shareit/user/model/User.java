@@ -21,10 +21,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column
+    @Column(name = "name",nullable = false)
     String name;
     @Email
-    @Column(nullable = false)
+    @Column(name = "email",nullable = false)
     String email;
 
     @Override

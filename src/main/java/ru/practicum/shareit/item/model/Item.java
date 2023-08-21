@@ -23,13 +23,13 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name",nullable = false)
     String name;
 
-    @Column(nullable = false)
+    @Column(name = "description",nullable = false)
     String description;
 
-    @Column(nullable = false)
+    @Column(name = "available", nullable = false)
     Boolean available;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,7 +39,6 @@ public class Item {
 
     @Column(name = "request_id")
     Long requestId;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

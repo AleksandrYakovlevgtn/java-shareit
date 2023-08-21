@@ -9,7 +9,6 @@ import ru.practicum.shareit.markers.Create;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 @Getter
 @Setter
@@ -19,11 +18,9 @@ public class ItemDto {
     Long id;
 
     @NotBlank(groups = Create.class)
-    @Size(max = 255)
     String name;
 
     @NotBlank(groups = Create.class)
-    @Size(max = 1000)
     String description;
 
     @NotNull(groups = Create.class)

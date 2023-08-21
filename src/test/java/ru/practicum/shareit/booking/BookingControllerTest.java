@@ -36,6 +36,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class BookingControllerTest {
     private final ObjectMapper mapper;
     private final MockMvc mvc;
+    @MockBean
+    private BookingService bookingService;
+    private BookingRequestDto bookingRequestDto;
+    private BookingResponseDto bookingResponseDto;
+    private int from;
+    private int size;
     private final User user1 = User.builder()
             .id(1L)
             .name("user 1")
@@ -75,12 +81,6 @@ public class BookingControllerTest {
             .booker(userDto2)
             .status(Status.WAITING)
             .build();
-    @MockBean
-    private BookingService bookingService;
-    private BookingRequestDto bookingRequestDto;
-    private BookingResponseDto bookingResponseDto;
-    private int from;
-    private int size;
 
     @BeforeEach
     public void beforeEach() {
