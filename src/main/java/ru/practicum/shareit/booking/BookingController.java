@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +15,6 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
-@Slf4j
 @RequiredArgsConstructor
 @Validated
 @RestController
@@ -26,7 +24,7 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingResponseDto> getAllByOwnerId(
-            @RequestHeader(Constants.headerUserId) Long userId,
+            @RequestHeader(Constants.HEADER_USER_ID) Long userId,
             @RequestParam(defaultValue = "ALL") String state,
             @RequestParam(defaultValue = Constants.PAGE_DEFAULT_FROM, required = false) @PositiveOrZero Integer from,
             @RequestParam(defaultValue = Constants.PAGE_DEFAULT_SIZE, required = false) @Positive Integer size) {
@@ -36,14 +34,14 @@ public class BookingController {
     }
 
     @GetMapping("/{id}")
-    public BookingResponseDto getById(@RequestHeader(Constants.headerUserId) Long userId,
+    public BookingResponseDto getById(@RequestHeader(Constants.HEADER_USER_ID) Long userId,
                                       @PathVariable Long id) {
         return bookingService.getById(userId, id);
     }
 
     @GetMapping
     public List<BookingResponseDto> getAllByBookerId(
-            @RequestHeader(Constants.headerUserId) Long userId,
+            @RequestHeader(Constants.HEADER_USER_ID) Long userId,
             @RequestParam(defaultValue = "ALL") String state,
             @RequestParam(defaultValue = Constants.PAGE_DEFAULT_FROM) @PositiveOrZero Integer from,
             @RequestParam(defaultValue = Constants.PAGE_DEFAULT_SIZE) @Positive Integer size) {
@@ -53,13 +51,13 @@ public class BookingController {
     }
 
     @PostMapping
-    public BookingResponseDto add(@RequestHeader(Constants.headerUserId) Long userId,
+    public BookingResponseDto add(@RequestHeader(Constants.HEADER_USER_ID) Long userId,
                                   @Valid @RequestBody BookingRequestDto bookingRequestDto) {
         return bookingService.add(userId, bookingRequestDto);
     }
 
     @PatchMapping("/{id}")
-    public BookingResponseDto update(@RequestHeader(Constants.headerUserId) Long userId,
+    public BookingResponseDto update(@RequestHeader(Constants.HEADER_USER_ID) Long userId,
                                      @PathVariable Long id,
                                      @RequestParam() Boolean approved) {
         return bookingService.update(userId, id, approved);

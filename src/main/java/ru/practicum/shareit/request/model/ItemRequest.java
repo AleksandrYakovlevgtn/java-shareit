@@ -24,7 +24,7 @@ public class ItemRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(nullable = false)
+    @Column(name = "description", nullable = false)
     String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,7 +32,7 @@ public class ItemRequest {
     @JoinColumn(name = "requester_id", referencedColumnName = "id", nullable = false)
     User requesterId;
 
-    @Column(nullable = false)
+    @Column(name = "created", nullable = false)
     LocalDateTime created;
 
     @Override

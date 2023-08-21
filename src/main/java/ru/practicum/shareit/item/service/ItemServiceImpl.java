@@ -147,9 +147,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> search(String text, Pageable pageable) {
-        if (text.isBlank() || text.isEmpty()) {
-            return new ArrayList<>();
-        }
+        if (text.isBlank()) return Collections.emptyList();
         return itemRepository.search(text, pageable).stream().map(itemMapper::toItemDto).collect(Collectors.toList());
     }
 
