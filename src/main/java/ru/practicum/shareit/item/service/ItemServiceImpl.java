@@ -196,8 +196,7 @@ public class ItemServiceImpl implements ItemService {
         return commentDtosByItem;
     }
 
-    private Map<Long, List<BookingItemDto>> bookingDtosByItem
-            (Page<Item> items, Map<Item, List<Booking>> bookingsByItem) {
+    private Map<Long, List<BookingItemDto>> bookingDtosByItem(Page<Item> items, Map<Item, List<Booking>> bookingsByItem) {
         Map<Long, List<BookingItemDto>> bookingDtosByItem = new HashMap<>();
         for (Item item : items) {
             if (bookingsByItem.get(item) != null) {
