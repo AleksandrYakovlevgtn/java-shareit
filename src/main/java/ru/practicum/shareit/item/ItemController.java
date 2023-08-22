@@ -26,14 +26,14 @@ public class ItemController {
 
     @GetMapping
     public List<ItemExtendedDto> getByOwnerId(
-            @RequestHeader(Constants.HEADER_USER_ID) Long userId,
+            @RequestHeader(Constants.headerUserId) Long userId,
             @RequestParam(defaultValue = Constants.PAGE_DEFAULT_FROM) @PositiveOrZero Integer from,
             @RequestParam(defaultValue = Constants.PAGE_DEFAULT_SIZE) @Positive Integer size) {
         return itemService.getByOwnerId(userId, PageRequest.of(from / size, size));
     }
 
     @GetMapping("/{id}")
-    public ItemExtendedDto getById(@RequestHeader(Constants.HEADER_USER_ID) Long userId,
+    public ItemExtendedDto getById(@RequestHeader(Constants.headerUserId) Long userId,
                                    @PathVariable Long id) {
         return itemService.getById(userId, id);
     }
@@ -46,20 +46,20 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto add(@RequestHeader(Constants.HEADER_USER_ID) Long userId,
+    public ItemDto add(@RequestHeader(Constants.headerUserId) Long userId,
                        @Validated(Create.class) @RequestBody ItemDto itemDto) {
         return itemService.add(userId, itemDto);
     }
 
     @PostMapping("{id}/comment")
-    public CommentDto addComment(@RequestHeader(Constants.HEADER_USER_ID) long userId,
+    public CommentDto addComment(@RequestHeader(Constants.headerUserId) long userId,
                                  @PathVariable long id,
                                  @Valid @RequestBody CommentRequestDto commentRequestDto) {
         return itemService.addComment(userId, id, commentRequestDto);
     }
 
     @PatchMapping("/{id}")
-    public ItemDto update(@RequestHeader(Constants.HEADER_USER_ID) Long userId,
+    public ItemDto update(@RequestHeader(Constants.headerUserId) Long userId,
                           @PathVariable Long id,
                           @Validated(Update.class) @RequestBody ItemDto itemDto) {
         return itemService.update(userId, id, itemDto);

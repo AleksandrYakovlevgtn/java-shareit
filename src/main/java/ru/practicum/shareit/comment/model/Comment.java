@@ -29,7 +29,7 @@ public class Comment {
 
     @Column(name = "created_date", nullable = false)
     LocalDateTime created;
-    @JoinColumn(name = "item_id", referencedColumnName = "id")
+    @Column(name = "item_id")
     Long itemId;
 
     @ManyToOne(fetch = FetchType.LAZY)

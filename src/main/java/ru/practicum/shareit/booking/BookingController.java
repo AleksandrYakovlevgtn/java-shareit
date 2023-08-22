@@ -24,7 +24,7 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingResponseDto> getAllByOwnerId(
-            @RequestHeader(Constants.HEADER_USER_ID) Long userId,
+            @RequestHeader(Constants.headerUserId) Long userId,
             @RequestParam(defaultValue = "ALL") String state,
             @RequestParam(defaultValue = Constants.PAGE_DEFAULT_FROM, required = false) @PositiveOrZero Integer from,
             @RequestParam(defaultValue = Constants.PAGE_DEFAULT_SIZE, required = false) @Positive Integer size) {
@@ -34,14 +34,14 @@ public class BookingController {
     }
 
     @GetMapping("/{id}")
-    public BookingResponseDto getById(@RequestHeader(Constants.HEADER_USER_ID) Long userId,
+    public BookingResponseDto getById(@RequestHeader(Constants.headerUserId) Long userId,
                                       @PathVariable Long id) {
         return bookingService.getById(userId, id);
     }
 
     @GetMapping
     public List<BookingResponseDto> getAllByBookerId(
-            @RequestHeader(Constants.HEADER_USER_ID) Long userId,
+            @RequestHeader(Constants.headerUserId) Long userId,
             @RequestParam(defaultValue = "ALL") String state,
             @RequestParam(defaultValue = Constants.PAGE_DEFAULT_FROM) @PositiveOrZero Integer from,
             @RequestParam(defaultValue = Constants.PAGE_DEFAULT_SIZE) @Positive Integer size) {
@@ -51,13 +51,13 @@ public class BookingController {
     }
 
     @PostMapping
-    public BookingResponseDto add(@RequestHeader(Constants.HEADER_USER_ID) Long userId,
+    public BookingResponseDto add(@RequestHeader(Constants.headerUserId) Long userId,
                                   @Valid @RequestBody BookingRequestDto bookingRequestDto) {
         return bookingService.add(userId, bookingRequestDto);
     }
 
     @PatchMapping("/{id}")
-    public BookingResponseDto update(@RequestHeader(Constants.HEADER_USER_ID) Long userId,
+    public BookingResponseDto update(@RequestHeader(Constants.headerUserId) Long userId,
                                      @PathVariable Long id,
                                      @RequestParam() Boolean approved) {
         return bookingService.update(userId, id, approved);

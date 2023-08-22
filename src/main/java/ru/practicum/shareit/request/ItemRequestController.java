@@ -24,27 +24,27 @@ public class ItemRequestController {
 
     @PostMapping
     public ItemRequestDto add(
-            @RequestHeader(Constants.HEADER_USER_ID) Long userId,
+            @RequestHeader(Constants.headerUserId) Long userId,
             @Valid @RequestBody ItemRequestAddDto itemRequestCreateDto) {
         return itemRequestService.add(userId, itemRequestCreateDto);
     }
 
     @GetMapping("/{id}")
     public ItemRequestExtendedDto getById(
-            @RequestHeader(Constants.HEADER_USER_ID) Long userId,
+            @RequestHeader(Constants.headerUserId) Long userId,
             @PathVariable Long id) {
         return itemRequestService.getById(userId, id);
     }
 
     @GetMapping
     public List<ItemRequestExtendedDto> getByRequesterId(
-            @RequestHeader(Constants.HEADER_USER_ID) Long userId) {
+            @RequestHeader(Constants.headerUserId) Long userId) {
         return itemRequestService.getByRequesterId(userId);
     }
 
     @GetMapping("/all")
     public List<ItemRequestExtendedDto> getAll(
-            @RequestHeader(Constants.HEADER_USER_ID) Long userId,
+            @RequestHeader(Constants.headerUserId) Long userId,
             @RequestParam(defaultValue = Constants.PAGE_DEFAULT_FROM) @PositiveOrZero Integer from,
             @RequestParam(defaultValue = Constants.PAGE_DEFAULT_SIZE) @Positive Integer size) {
         return itemRequestService.getAll(userId, PageRequest.of(from / size, size));
