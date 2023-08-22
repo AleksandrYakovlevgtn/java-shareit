@@ -181,8 +181,7 @@ public class ItemServiceImpl implements ItemService {
         return commentRepository.findByItemId(item.getId()).stream().map(itemMapper::commentToCommentDto).collect(Collectors.toList());
     }
 
-    private Map<Long, List<CommentDto>> commentDtosByItem
-            (Page<Item> items, Map<Long, List<Comment>> commentsByItem) {
+    private Map<Long, List<CommentDto>> commentDtosByItem(Page<Item> items, Map<Long, List<Comment>> commentsByItem) {
         Map<Long, List<CommentDto>> commentDtosByItem = new HashMap<>();
         for (Item item : items) {
             if (commentsByItem.get(item.getId()) == null) {
