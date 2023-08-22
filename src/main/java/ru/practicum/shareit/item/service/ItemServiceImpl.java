@@ -147,10 +147,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> search(String text, Pageable pageable) {
-        if (text.isBlank()) return Collections.emptyList();
+        if (text.isBlank() || text.isEmpty()) {
+            return new ArrayList<>();
+        }
         return itemRepository.search(text, pageable).stream().map(itemMapper::toItemDto).collect(Collectors.toList());
     }
-
 
     private BookingItemDto addLastBooking(Item item) {
         List<Booking> bookings = bookingRepository.findByItemIdAndStartBeforeAndStatusEqualsOrderByStartDesc(
@@ -180,7 +181,8 @@ public class ItemServiceImpl implements ItemService {
         return commentRepository.findByItemId(item.getId()).stream().map(itemMapper::commentToCommentDto).collect(Collectors.toList());
     }
 
-    private Map<Long, List<CommentDto>> commentDtosByItem(Page<Item> items, Map<Long, List<Comment>> commentsByItem) {
+    private Map<Long, List<CommentDto>> commentDtosByItem
+            (Page<Item> items, Map<Long, List<Comment>> commentsByItem) {
         Map<Long, List<CommentDto>> commentDtosByItem = new HashMap<>();
         for (Item item : items) {
             if (commentsByItem.get(item.getId()) == null) {
@@ -195,7 +197,8 @@ public class ItemServiceImpl implements ItemService {
         return commentDtosByItem;
     }
 
-    private Map<Long, List<BookingItemDto>> bookingDtosByItem(Page<Item> items, Map<Item, List<Booking>> bookingsByItem) {
+    private Map<Long, List<BookingItemDto>> bookingDtosByItem
+            (Page<Item> items, Map<Item, List<Booking>> bookingsByItem) {
         Map<Long, List<BookingItemDto>> bookingDtosByItem = new HashMap<>();
         for (Item item : items) {
             if (bookingsByItem.get(item) != null) {
