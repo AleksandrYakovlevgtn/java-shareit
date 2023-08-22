@@ -24,18 +24,18 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "text",nullable = false)
+    @Column(nullable = false)
     String text;
 
     @Column(name = "created_date", nullable = false)
     LocalDateTime created;
-    @Column(name = "item_id")
-    Long itemId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "author_id", referencedColumnName = "id", nullable = false)
     User author;
+    @Column(name = "item_id")
+    Long itemId;
 
     @Override
     public boolean equals(Object o) {
