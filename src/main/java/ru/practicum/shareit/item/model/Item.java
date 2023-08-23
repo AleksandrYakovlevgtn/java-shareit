@@ -23,16 +23,16 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     String name;
 
-    @Column(nullable = false)
+    @Column(name = "description", nullable = false)
     String description;
 
-    @Column(nullable = false)
+    @Column(name = "available", nullable = false)
     Boolean available;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false)
     User owner;

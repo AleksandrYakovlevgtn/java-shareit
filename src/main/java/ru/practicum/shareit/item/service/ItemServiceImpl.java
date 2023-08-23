@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingItemDto;
@@ -17,7 +19,7 @@ import ru.practicum.shareit.exception.BookingException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemExtendedDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.service.UserService;
@@ -50,7 +52,7 @@ public class ItemServiceImpl implements ItemService {
         Comment comment = itemMapper.commentRequestDtoToComment(commentRequestDto,
                 LocalDateTime.now(),
                 userService.getUserById(userId),
-                getItemById(id));
+                id);
 
         if (bookingRepository.findByItemIdAndBookerIdAndEndIsBeforeAndStatusEquals(
                 id, userId, LocalDateTime.now(), Status.APPROVED).isEmpty()) {
@@ -80,17 +82,22 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemExtendedDto> getByOwnerId(Long userId) {
-        List<Item> items = itemRepository.getAllByOwnerIdOrderByIdAsc(userId);
+    public List<ItemExtendedDto> getByOwnerId(Long userId, Pageable pageable) {
+        Page<Item> items = itemRepository.findByOwnerIdOrderByIdAsc(userId, pageable);
+
         List<Long> itemIds = items.stream().map(Item::getId).collect(Collectors.toList());
-        Map<Item, List<Comment>> commentsByItem = commentRepository.findByItemIdIn(itemIds).stream().collect(Collectors.groupingBy(Comment::getItem));
+
+        Map<Long, List<Comment>> commentsByItem = commentRepository.findByItemIdIn(itemIds).stream().collect(Collectors.groupingBy(Comment::getItemId));
+
         Map<Item, List<Booking>> bookingsByItem = bookingRepository.findByItemIdIn(itemIds).stream().collect(Collectors.groupingBy(Booking::getItem));
 
         Map<Long, List<CommentDto>> commentDtosByItem = commentDtosByItem(items, commentsByItem);
+
         Map<Long, List<BookingItemDto>> bookingDtosByItem = bookingDtosByItem(items, bookingsByItem);
 
         Map<Long, BookingItemDto> lastBookingByItem = new HashMap<>();
         Map<Long, BookingItemDto> nextBookingByItem = new HashMap<>();
+
         for (Item item : items) {
             if (bookingsByItem.get(item) == null) {
                 lastBookingByItem.put(item.getId(), null);
@@ -139,13 +146,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> search(String text) {
-        if (text.isBlank() || text.isEmpty()) {
-            return new ArrayList<>();
+    public List<ItemDto> search(String text, Pageable pageable) {
+        if (text.isBlank()) {
+            return List.of();
         }
-        return itemRepository.search(text).stream().map(itemMapper::toItemDto).collect(Collectors.toList());
+        return itemRepository.search(text, pageable).stream().map(itemMapper::toItemDto).collect(Collectors.toList());
     }
-
 
     private BookingItemDto addLastBooking(Item item) {
         List<Booking> bookings = bookingRepository.findByItemIdAndStartBeforeAndStatusEqualsOrderByStartDesc(
@@ -175,13 +181,13 @@ public class ItemServiceImpl implements ItemService {
         return commentRepository.findByItemId(item.getId()).stream().map(itemMapper::commentToCommentDto).collect(Collectors.toList());
     }
 
-    private Map<Long, List<CommentDto>> commentDtosByItem(List<Item> items, Map<Item, List<Comment>> commentsByItem) {
+    private Map<Long, List<CommentDto>> commentDtosByItem(Page<Item> items, Map<Long, List<Comment>> commentsByItem) {
         Map<Long, List<CommentDto>> commentDtosByItem = new HashMap<>();
         for (Item item : items) {
-            if (commentsByItem.get(item) == null) {
+            if (commentsByItem.get(item.getId()) == null) {
                 commentDtosByItem.put(item.getId(), new ArrayList<>());
             } else {
-                commentDtosByItem.put(item.getId(), commentsByItem.get(item)
+                commentDtosByItem.put(item.getId(), commentsByItem.get(item.getId())
                         .stream()
                         .map(itemMapper::commentToCommentDto)
                         .collect(Collectors.toList()));
@@ -190,7 +196,7 @@ public class ItemServiceImpl implements ItemService {
         return commentDtosByItem;
     }
 
-    private Map<Long, List<BookingItemDto>> bookingDtosByItem(List<Item> items, Map<Item, List<Booking>> bookingsByItem) {
+    private Map<Long, List<BookingItemDto>> bookingDtosByItem(Page<Item> items, Map<Item, List<Booking>> bookingsByItem) {
         Map<Long, List<BookingItemDto>> bookingDtosByItem = new HashMap<>();
         for (Item item : items) {
             if (bookingsByItem.get(item) != null) {
