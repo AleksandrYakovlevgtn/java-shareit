@@ -7,10 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.enums.BookingState;
 import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.constants.Constants;
+import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 
 import java.util.Map;
 
@@ -19,7 +19,7 @@ public class BookingClient extends BaseClient {
     private static final String API_PREFIX = "/bookings";
 
     @Autowired
-    public BookingClient(@Value(Constants.headerServerUrl) String serverUrl, RestTemplateBuilder builder) {
+    public BookingClient(@Value(Constants.HEADER_SERVER_URL) String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
@@ -28,7 +28,7 @@ public class BookingClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> add(long userId, BookingRequestDto bookingRequestDto) {
+    public ResponseEntity<Object> add(long userId, BookItemRequestDto bookingRequestDto) {
         return post("", userId, bookingRequestDto);
     }
 

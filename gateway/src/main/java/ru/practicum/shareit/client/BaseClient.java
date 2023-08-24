@@ -1,21 +1,18 @@
 package ru.practicum.shareit.client;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import ru.practicum.shareit.constants.Constants;
 
-public class BaseClient {
+import java.util.List;
+import java.util.Map;
+
+public abstract class BaseClient {
     protected final RestTemplate rest;
 
-    public BaseClient(RestTemplate rest) {
+    protected BaseClient(RestTemplate rest) {
         this.rest = rest;
     }
 
@@ -59,6 +56,10 @@ public class BaseClient {
         return patch(path, userId, null, null);
     }
 
+    protected ResponseEntity<Object> patch(String path, long userId, @Nullable Map<String, Object> parameters) {
+        return patch(path, userId, parameters, null);
+    }
+
     protected <T> ResponseEntity<Object> patch(String path, long userId, T body) {
         return patch(path, userId, null, body);
     }
@@ -67,8 +68,8 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.PATCH, path, userId, parameters, body);
     }
 
-    protected ResponseEntity<Object> delete(String path) {
-        return delete(path, null, null);
+    protected void delete(String path) {
+        delete(path, null, null);
     }
 
     protected ResponseEntity<Object> delete(String path, long userId) {
@@ -100,7 +101,7 @@ public class BaseClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         if (userId != null) {
-            headers.set("X-Sharer-User-Id", String.valueOf(userId));
+            headers.set(Constants.HEADER_USER_ID, String.valueOf(userId));
         }
         return headers;
     }
