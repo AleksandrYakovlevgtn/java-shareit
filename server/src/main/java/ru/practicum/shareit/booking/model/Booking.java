@@ -24,27 +24,27 @@ import java.util.Objects;
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
     @Column(name = "start_date", nullable = false)
-    private LocalDateTime start;
+    LocalDateTime start;
 
     @Column(name = "end_date", nullable = false)
-    private LocalDateTime end;
+    LocalDateTime end;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Item item;
+    Item item;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booker_id", referencedColumnName = "id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private User booker;
+    User booker;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status;
+    Status status;
 
     @Override
     public boolean equals(Object o) {

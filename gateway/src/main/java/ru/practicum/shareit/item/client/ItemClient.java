@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
@@ -57,7 +56,7 @@ public class ItemClient extends BaseClient {
 
     public ResponseEntity<Object> search(String text, Long userId, int from, int size) {
         if (text.isBlank()) {
-            return ResponseEntity.status(HttpStatus.OK).body(List.of());
+            return ResponseEntity.ok(List.of());
         }
 
         Map<String, Object> parameters = Map.of(
