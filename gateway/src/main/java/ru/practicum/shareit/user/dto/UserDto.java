@@ -8,6 +8,7 @@ import javax.validation.constraints.Size;
 
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.markers.Create;
+import ru.practicum.shareit.markers.Update;
 
 @Data
 @AllArgsConstructor
@@ -17,8 +18,9 @@ import ru.practicum.shareit.markers.Create;
 public class UserDto {
     Long id;
     @Size(max = 255)
+    @NotBlank(groups = {Create.class})
     String name;
     @NotBlank(groups = {Create.class})
-    @Email
+    @Email(groups = {Create.class, Update.class})
     String email;
 }
