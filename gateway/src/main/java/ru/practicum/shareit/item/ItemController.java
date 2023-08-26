@@ -5,11 +5,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.constants.Constants;
+import ru.practicum.shareit.markers.Constants;
 import ru.practicum.shareit.item.client.ItemClient;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemExtendedDto;
+import ru.practicum.shareit.markers.Create;
+import ru.practicum.shareit.markers.Update;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -39,14 +41,14 @@ public class ItemController {
     @Validated
     @PostMapping
     public ResponseEntity<Object> add(@RequestHeader(Constants.HEADER_USER_ID) Long userId,
-                                      @Valid @RequestBody ItemExtendedDto itemExtendedDto) {
+                                      @Validated(Create.class) @RequestBody ItemExtendedDto itemExtendedDto) {
         return itemClient.add(userId, itemExtendedDto);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Object> update(@RequestHeader(Constants.HEADER_USER_ID) Long userId,
                                          @PathVariable Long id,
-                                         @RequestBody ItemDto itemDto) {
+                                         @Validated(Update.class) @RequestBody ItemDto itemDto) {
         return itemClient.update(userId, id, itemDto);
     }
 

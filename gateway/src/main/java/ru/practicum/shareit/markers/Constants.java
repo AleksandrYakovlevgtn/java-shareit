@@ -1,4 +1,4 @@
-package ru.practicum.shareit.constants;
+package ru.practicum.shareit.markers;
 
 public final class Constants {
     public static final String HEADER_USER_ID = "X-Sharer-User-Id";

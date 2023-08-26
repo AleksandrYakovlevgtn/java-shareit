@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.booking.enums.BookingState;
 import ru.practicum.shareit.client.BaseClient;
-import ru.practicum.shareit.constants.Constants;
+import ru.practicum.shareit.markers.Constants;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 
 import java.util.Map;

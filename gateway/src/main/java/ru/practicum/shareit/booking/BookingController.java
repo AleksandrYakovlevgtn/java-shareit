@@ -7,7 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.client.BookingClient;
 import ru.practicum.shareit.booking.enums.BookingState;
-import ru.practicum.shareit.constants.Constants;
+import ru.practicum.shareit.markers.Constants;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 
 import javax.validation.Valid;

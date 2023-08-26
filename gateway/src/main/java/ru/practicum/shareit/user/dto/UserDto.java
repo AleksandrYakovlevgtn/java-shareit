@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.constants.Create;
+import ru.practicum.shareit.markers.Create;
 
 @Data
 @AllArgsConstructor
