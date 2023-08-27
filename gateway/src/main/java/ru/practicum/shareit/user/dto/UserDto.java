@@ -17,10 +17,11 @@ import ru.practicum.shareit.markers.Update;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserDto {
     Long id;
-    @Size(max = 255)
+    @Size(max = 255, groups = {Create.class, Update.class})
     @NotBlank(groups = {Create.class})
     String name;
     @NotBlank(groups = {Create.class})
     @Email(groups = {Create.class, Update.class})
+    @Size(max = 512, groups = {Create.class, Update.class})
     String email;
 }

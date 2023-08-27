@@ -11,7 +11,6 @@ import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.markers.Constants;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemExtendedDto;
 
 import java.util.List;
 import java.util.Map;
@@ -31,9 +30,9 @@ public class ItemClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> add(long userId, ItemExtendedDto itemExtendedDto) {
+    public ResponseEntity<Object> add(long userId, ItemDto itemDto) {
 
-        return post("", userId, itemExtendedDto);
+        return post("", userId, itemDto);
     }
 
     public ResponseEntity<Object> addComment(long userId, long id, CommentDto commentDto) {

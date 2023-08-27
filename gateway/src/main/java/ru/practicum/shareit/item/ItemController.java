@@ -9,7 +9,6 @@ import ru.practicum.shareit.markers.Constants;
 import ru.practicum.shareit.item.client.ItemClient;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemExtendedDto;
 import ru.practicum.shareit.markers.Create;
 import ru.practicum.shareit.markers.Update;
 
@@ -41,8 +40,8 @@ public class ItemController {
     @Validated
     @PostMapping
     public ResponseEntity<Object> add(@RequestHeader(Constants.HEADER_USER_ID) Long userId,
-                                      @Validated(Create.class) @RequestBody ItemExtendedDto itemExtendedDto) {
-        return itemClient.add(userId, itemExtendedDto);
+                                      @Validated(Create.class) @RequestBody ItemDto itemDto) {
+        return itemClient.add(userId, itemDto);
     }
 
     @PatchMapping("/{id}")
